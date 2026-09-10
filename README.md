@@ -116,7 +116,7 @@ Terraform drops the resource from state with no delete API call. Never write
 
 | Secret | Migrated | Notes |
 |---|---|---|
-| `k3s-apps/sankey-export` | in progress (pilot) | |
+| `k3s-apps/sankey-export` | **yes (2026-09-10, pilot)** | value also rotated end-to-end via `infra/k3s-apps/scripts/rotate-sankey-export-app-password.sh` |
 | `home-infra/blocky` | no | + rotation automation (increment 2, lives in `infra/k3s-apps`) |
 | `home-infra/open-webui` | no | |
 | `home-infra/grafana` | no | |
