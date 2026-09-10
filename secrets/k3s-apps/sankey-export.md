@@ -21,7 +21,7 @@ script do the rest.
 ```bash
 # on the homeserver -- the one step nothing else can do (see below)
 docker exec nextcloud-aio-nextcloud php occ user:auth-tokens:add \
-  --user sankey-export --name "rotate-$(date +%F)"
+  --name "rotate-$(date +%F)" -- sankey-export
 
 # then, from an infra/k3s-apps checkout, with the SSH tunnel open and
 # `aws login` done:
