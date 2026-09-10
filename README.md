@@ -76,7 +76,10 @@ Follows the ADR 0006 / ADR 0010 pattern (the `aws-account-bootstrap` →
    (name/description/recovery-window copied **verbatim** from
    `terraform-state` so the import is zero-diff; keep
    `lifecycle { prevent_destroy = true }`) plus a **transient**
-   `import { to = ..., id = "<secret name>" }` block.
+   `import { to = ..., id = "<full ARN>" }` block. The import ID must be
+   the **ARN**, not the secret name — AWS provider v6 rejects the name.
+   Get the current ARN (including AWS's random suffix) with
+   `aws secretsmanager describe-secret --secret-id <name> --query ARN --output text`.
 2. `scripts/roll-out.sh plan` → must show exactly
    `1 to import, 0 to add/change/destroy`.
 3. `scripts/roll-out.sh apply`. Delete the `import` block; commit;

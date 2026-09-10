@@ -34,9 +34,15 @@ locals {
 # `terraform apply` imports the secret, then re-run `terraform plan` and
 # confirm "No changes." (matches the ADR 0006 / ADR 0010 precedent, where
 # import blocks are never left in committed config).
+#
+# The import ID must be the full ARN, not the secret name -- AWS provider
+# v6 rejects the name ("could not parse import ID ... as ARN"). The
+# trailing "-YN8zoD" is the random 6-char suffix AWS assigns; it's stable
+# for the life of the secret (get the current one with
+# `aws secretsmanager describe-secret --secret-id <name> --query ARN`).
 import {
   to = aws_secretsmanager_secret.k3s_apps_sankey_export
-  id = "k3s-apps/sankey-export"
+  id = "arn:aws:secretsmanager:eu-central-1:853955636908:secret:k3s-apps/sankey-export-YN8zoD"
 }
 
 resource "aws_secretsmanager_secret" "k3s_apps_sankey_export" {
