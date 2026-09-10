@@ -49,5 +49,5 @@ moved {
 #     --query ARN --output text --region eu-central-1
 import {
   to = module.home_infra_grafana.aws_secretsmanager_secret.this
-  id = "arn:aws:secretsmanager:eu-central-1:853955636908:secret:home-infra/grafana-REPLACE_WITH_REAL_SUFFIX"
+  id = "arn:aws:secretsmanager:eu-central-1:853955636908:secret:home-infra/grafana-RSvc5G"
 }
