@@ -13,22 +13,55 @@ repo's own README) — container only, no value.
 ### `sankey_export_app_password`
 Nextcloud app password for the dedicated `sankey-export` bot account
 (never `admin`) — used to download the budget spreadsheet and upload
-the rendered PNG back over WebDAV. No dedicated rotation playbook
-exists. Manual flow:
+the rendered PNG back over WebDAV.
+
+**Rotation:** mint the new token on the homeserver, then let the helper
+script do the rest.
+
 ```bash
+# on the homeserver -- the one step nothing else can do (see below)
 docker exec nextcloud-aio-nextcloud php occ user:auth-tokens:add \
-  --user sankey-export --name "<new token name>"
+  --user sankey-export --name "rotate-$(date +%F)"
+
+# then, from an infra/k3s-apps checkout, with the SSH tunnel open and
+# `aws login` done:
+scripts/rotate-sankey-export-app-password.sh 'the-printed-token'
 ```
-capture the printed token, `put-secret-value`, `terraform apply`.
-Revoke the superseded token only after confirming the new one works
-(`occ user:auth-tokens:list --user sankey-export`, then
-`occ user:auth-tokens:delete` on the old one by ID) — both tokens stay
-valid until you revoke one, so there's no blackout window if you check
-first.
+
+The script merges the token into this secret (`put-secret-value`), runs
+`terraform apply` to roll `kubernetes_secret_v1.sankey_export_app_password`,
+waits for the next CronJob run to prove the new token works, and prints
+the `occ user:auth-tokens:delete` command for the old token. It never
+touches the old token — both stay valid until you delete the old one,
+so there's no blackout window.
 
 ## Automated rotation
 
-Possible but needs a Lambda that can reach the homeserver's own `occ`
-CLI (via Docker exec or an equivalent API) — a real build, not a
-native AWS rotation template. Same shape as
+**The mint step is a hard wall.** A Nextcloud app password cannot mint
+another one (a deliberate Nextcloud boundary — `GET /ocs/v2.php/core/getapppassword`
+rejects app-password auth). The only things that can are `occ` on the
+homeserver, or the account's login password:
+
+- The in-cluster self-hosted runner *can* reach Nextcloud's WebDAV/OCS
+  endpoint (`192.168.101.1:11000`, the same one the CronJob uses), but
+  `occ` runs *inside* the `nextcloud-aio-nextcloud` container — the
+  runner has no `docker exec` / SSH to the homeserver, and giving it a
+  key (shared across all 7 repos' workflows) is far too much privilege
+  for a bot password.
+- The `sankey-export` account's login password was generated and
+  discarded at bootstrap (ADR 0008) — storing it just to enable
+  `getapppassword` automation trades an occasionally-rotated app
+  password for a never-rotated login password plus a scheduled
+  workflow, marginal value for a once-a-year-at-most rotation.
+
+An AWS-native rotation Lambda is doubly blocked: no route to the
+private k3s network at all, *and* nothing propagates a `put-secret-value`
+into the live Kubernetes Secret without a `terraform apply` a Lambda
+can't run. See
+`docs/home-infra-docs/docs/runbooks/rotate-secrets.md`'s own reality-check
+section.
+
+**So**: everything after the mint is automated
+(`scripts/rotate-sankey-export-app-password.sh`); the mint stays one
+manual `occ` line. Same practical ceiling as
 `home-infra/home-agent.md`'s `nextcloud_tools_app_password`.
