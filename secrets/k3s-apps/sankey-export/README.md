@@ -1,9 +1,11 @@
 # Secret: `k3s-apps/sankey-export`
 
-**Terraform resource**: `aws_secretsmanager_secret.k3s_apps_sankey_export`
-(`bootstrap/secrets-manager/secrets_manager.tf` — migrated here from
-`bootstrap/terraform-state` 2026-09-10, the pilot for the campaign in that
-repo's own README) — container only, no value.
+**Terraform resource**:
+`module.k3s_apps_sankey_export.aws_secretsmanager_secret.this`, defined
+in `./main.tf` alongside this file (`bootstrap/secrets-manager`, the
+per-secret module dir). Migrated here from `bootstrap/terraform-state`
+2026-09-10, the pilot for the campaign in that repo's own README —
+container only, no value.
 
 **Consumed by**: `infra/k3s-apps`' `modules/sankey_export`, read via
 `secrets.tf`.

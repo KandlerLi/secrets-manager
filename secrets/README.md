@@ -1,20 +1,24 @@
 # Secret documentation
 
-Per-secret documentation for every `aws_secretsmanager_secret` resource —
-one file per Secrets Manager group, path mirroring the group's own name
-(`home-infra/authelia` → `home-infra/authelia.md`). Each file covers what
-the group's keys are, who consumes them, and exactly how to rotate each
-one; see `docs/home-infra-docs/docs/runbooks/rotate-secrets.md` for the
-cross-cutting rotation categories and automated-rotation feasibility this
-folder's own files draw from.
+One directory per `aws_secretsmanager_secret` container, path mirroring
+the secret's own name (`home-infra/authelia` →
+`home-infra/authelia/`). Each directory holds the secret's own `main.tf`
+(the `resource`, `lifecycle { prevent_destroy = true }`, an `arn`
+output) and a `README.md` covering what its keys are, who consumes
+them, and exactly how to rotate each one. See
+`docs/home-infra-docs/docs/runbooks/rotate-secrets.md` for the
+cross-cutting rotation categories and automated-rotation feasibility
+these draw from.
 
-The `resource` blocks are being migrated out of
-`bootstrap/terraform-state/secrets_manager.tf` into
-`bootstrap/secrets-manager/secrets_manager.tf` one group at a time — see
-this repo's own `README.md` for the migration-status table and the
-`removed`/`import` handoff procedure. Each file's own **Terraform
-resource** line names where that group's block currently lives.
+The containers are being migrated out of
+`bootstrap/terraform-state/secrets_manager.tf` into a directory here
+one group at a time — see this repo's own `README.md` for the
+migration-status table and the `removed`/`import` handoff procedure.
+Until a group has migrated it has only a `.md` file here (no
+directory); its `.md` names where its `resource` block currently lives.
 
+- [k3s-apps/sankey-export](k3s-apps/sankey-export/README.md) — the
+  sankey-export CronJob's Nextcloud app password (**migrated**)
 - [home-infra/authelia](home-infra/authelia.md) — Authelia's own
   session/storage/OIDC crypto material, plus one personal login
 - [home-infra/grafana](home-infra/grafana.md) — Grafana's admin
@@ -34,10 +38,7 @@ resource** line names where that group's block currently lives.
   password
 - [home-infra/github-runner](home-infra/github-runner.md) — the
   shared GitHub Actions runner PAT
-- [k3s-apps/sankey-export](k3s-apps/sankey-export.md) — the
-  sankey-export CronJob's Nextcloud app password
 
-Every group here also has a `lifecycle { prevent_destroy = true }` on its
-`resource` block — these are foundational, load-bearing resources for
-every service migrated off SOPS, not something a stray `terraform apply`
-should ever remove.
+Every container has `lifecycle { prevent_destroy = true }` — these are
+foundational, load-bearing resources for every service migrated off
+SOPS, not something a stray `terraform apply` should ever remove.
