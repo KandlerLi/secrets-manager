@@ -26,25 +26,11 @@ locals {
 }
 
 # --- k3s-apps/sankey-export -----------------------------------------------
-# Migrated from bootstrap/terraform-state 2026-09-10 (pilot).
-# Key: sankey_export_app_password. Consumer: infra/k3s-apps'
-# modules/sankey_export.
-
-# TRANSIENT -- strip this block in the commit immediately after the first
-# `terraform apply` imports the secret, then re-run `terraform plan` and
-# confirm "No changes." (matches the ADR 0006 / ADR 0010 precedent, where
-# import blocks are never left in committed config).
-#
-# The import ID must be the full ARN, not the secret name -- AWS provider
-# v6 rejects the name ("could not parse import ID ... as ARN"). The
-# trailing "-YN8zoD" is the random 6-char suffix AWS assigns; it's stable
-# for the life of the secret (get the current one with
-# `aws secretsmanager describe-secret --secret-id <name> --query ARN`).
-import {
-  to = aws_secretsmanager_secret.k3s_apps_sankey_export
-  id = "arn:aws:secretsmanager:eu-central-1:853955636908:secret:k3s-apps/sankey-export-YN8zoD"
-}
-
+# Migrated from bootstrap/terraform-state 2026-09-10 (pilot). Key:
+# sankey_export_app_password. Consumer: infra/k3s-apps' modules/sankey_export.
+# The transient `import` block used for the handoff was stripped after the
+# first apply (ADR 0006 / ADR 0010 precedent); bootstrap/terraform-state
+# keeps the matching `removed { ... destroy = false }` block.
 resource "aws_secretsmanager_secret" "k3s_apps_sankey_export" {
   name                    = "k3s-apps/sankey-export"
   description             = "sankey_export CronJob's own Nextcloud app password"
