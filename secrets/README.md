@@ -19,11 +19,11 @@ directory); its `.md` names where its `resource` block currently lives.
 
 - [k3s-apps/sankey-export](k3s-apps/sankey-export/README.md) — the
   sankey-export CronJob's Nextcloud app password (**migrated**)
+- [home-infra/grafana](home-infra/grafana/README.md) — Grafana's
+  Authelia OIDC client secret (its dead admin password was removed in
+  the same pass) (**migrated**)
 - [home-infra/authelia](home-infra/authelia.md) — Authelia's own
   session/storage/OIDC crypto material, plus one personal login
-- [home-infra/grafana](home-infra/grafana.md) — Grafana's admin
-  password (functionally dead, flagged for removal) and its OIDC
-  client secret
 - [home-infra/open-webui](home-infra/open-webui.md) — Open WebUI's
   OIDC client secret
 - [home-infra/nextcloud](home-infra/nextcloud.md) — Nextcloud's OIDC

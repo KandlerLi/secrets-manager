@@ -28,6 +28,10 @@ module "k3s_apps_sankey_export" {
   source = "./secrets/k3s-apps/sankey-export"
 }
 
+module "home_infra_grafana" {
+  source = "./secrets/home-infra/grafana"
+}
+
 # Refactored 2026-09-10 from a bare `resource` in the old
 # secrets_manager.tf into the per-secret module above -- a
 # within-state address change, no API call, prevent_destroy untouched.
@@ -35,4 +39,15 @@ module "k3s_apps_sankey_export" {
 moved {
   from = aws_secretsmanager_secret.k3s_apps_sankey_export
   to   = module.k3s_apps_sankey_export.aws_secretsmanager_secret.this
+}
+
+# TRANSIENT -- strip after the first apply imports the secret, then
+# re-plan and confirm "No changes" (ADR 0006 / ADR 0010 precedent).
+# Import ID is the full ARN (AWS provider v6 rejects a bare name); get
+# the current one with:
+#   aws secretsmanager describe-secret --secret-id home-infra/grafana \
+#     --query ARN --output text --region eu-central-1
+import {
+  to = module.home_infra_grafana.aws_secretsmanager_secret.this
+  id = "arn:aws:secretsmanager:eu-central-1:853955636908:secret:home-infra/grafana-REPLACE_WITH_REAL_SUFFIX"
 }
