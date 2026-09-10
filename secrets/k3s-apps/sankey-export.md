@@ -23,8 +23,8 @@ script do the rest.
 docker exec nextcloud-aio-nextcloud php occ user:auth-tokens:add \
   --name "rotate-$(date +%F)" -- sankey-export
 
-# then, from an infra/k3s-apps checkout, with the SSH tunnel open and
-# `aws login` done:
+# then, from an infra/k3s-apps checkout, with `aws login` done (the
+# script opens the SSH tunnel itself, like roll-out.sh elsewhere):
 scripts/rotate-sankey-export-app-password.sh 'the-printed-token'
 ```
 
