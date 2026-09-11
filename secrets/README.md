@@ -26,8 +26,8 @@ directory); its `.md` names where its `resource` block currently lives.
   WebUI's OIDC client secret (**migrated**)
 - [home-infra/authelia](home-infra/authelia.md) — Authelia's own
   session/storage/OIDC crypto material, plus one personal login
-- [home-infra/nextcloud](home-infra/nextcloud.md) — Nextcloud's OIDC
-  client secret (Ansible-consumed, not Terraform)
+- [home-infra/nextcloud](home-infra/nextcloud/README.md) — Nextcloud's
+  OIDC client secret (Ansible-consumed, not Terraform) (**migrated**)
 - [home-infra/home-agent](home-infra/home-agent/README.md) —
   home_agent's OpenAI/GHCR credentials and its nextcloud_tools app
   password (**migrated**)

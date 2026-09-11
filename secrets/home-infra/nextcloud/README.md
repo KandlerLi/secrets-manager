@@ -1,8 +1,10 @@
 # Secret: `home-infra/nextcloud`
 
-**Terraform resource**: `aws_secretsmanager_secret.home_infra_nextcloud`
-(`bootstrap/terraform-state/secrets_manager.tf` — migrating to `bootstrap/secrets-manager/`, see that repo's README migration-status table) — container only, no
-value.
+**Terraform resource**:
+`module.home_infra_nextcloud.aws_secretsmanager_secret.this`, defined
+in `./main.tf` alongside this file (`bootstrap/secrets-manager`, the
+per-secret module dir). Migrated here from `bootstrap/terraform-state`
+2026-09-11 — container only, no value.
 
 **Consumed by**: `infra/home-infra`'s own Ansible
 (`ansible/playbooks/site.yml`'s `pre_tasks`, gated on
@@ -21,7 +23,11 @@ Grafana/Open WebUI's: after `put-secret-value` on both this group and
 `home-infra/authelia`, `terraform apply` in `infra/k3s-apps` rolls
 Authelia, but reaching Nextcloud's own config needs a separate
 `ansible-playbook ansible/playbooks/site.yml --ask-become-pass` run
-against the homeserver (`infra/home-infra`).
+against the homeserver (`infra/home-infra`) — confirm what that run
+actually templates before assuming it's needed (the `home-infra/
+monitoring` migration found live 2026-09-11 that a "consumed by
+Ansible" secret can still turn out to be assert-only, not templated
+anywhere).
 
 ## Automated rotation
 
