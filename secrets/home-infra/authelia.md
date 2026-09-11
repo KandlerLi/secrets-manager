@@ -86,21 +86,25 @@ docker run --rm authelia/authelia:4.39.22 \
 This prints both the random plaintext and its pbkdf2 hash — keep both,
 they go to two different secrets.
 
-**Grafana or Open WebUI**: feed both values to
-`infra/k3s-apps/scripts/rotate-oidc-client-secret.sh grafana` (or
-`openwebui`) — it writes both secrets and runs `terraform apply` (rolls
-Authelia and the client Deployment together, in sync), rejecting an
-obviously-swapped pair (a pbkdf2 hash always starts with `$`, the
-random plaintext never does).
+Feed both values to `infra/k3s-apps/scripts/rotate-oidc-client-secret.sh
+grafana` (or `openwebui`, or `nextcloud`) — it writes both secrets and
+rejects an obviously-swapped pair (a pbkdf2 hash always starts with
+`$`, the random plaintext never does).
 
-**Nextcloud** has no helper script (verified live 2026-09-11): its
-plaintext flows through `infra/home-infra`'s own Ansible, not
-Terraform, since Nextcloud AIO runs on the homeserver. Manual order:
-`put-secret-value` the hash here, `put-secret-value` the plaintext into
-`authelia_oidc_nextcloud_client_secret` in `home-infra/nextcloud`,
-`terraform apply` in `infra/k3s-apps` (Authelia's own side), then
-re-run `infra/home-infra`'s `site.yml` so the new plaintext reaches
-`nextcloud_aio`'s own OIDC config.
+**Grafana/Open WebUI**: the script then runs `terraform apply` (rolls
+Authelia and the client Deployment together, in sync) and stops there
+— both live in `infra/k3s-apps`.
+
+**Nextcloud** (script support added 2026-09-11 — it used to be
+manual): the script runs the same `terraform apply` for Authelia's own
+side, then also re-runs `infra/home-infra`'s `site.yml`
+(`--ask-become-pass`, so you run this one yourself) so the new
+plaintext reaches Nextcloud's own `occ user_oidc:provider` config —
+confirmed live that step is a real upsert, not a formality (unlike
+`home-infra/monitoring`'s SES creds, which turned out to be
+assert-only in Ansible). Nextcloud AIO runs on the homeserver, not
+k3s, so there's no Terraform-side Deployment to roll for it the way
+Grafana/Open WebUI get.
 
 ## Automated rotation
 

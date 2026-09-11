@@ -17,17 +17,21 @@ on the homeserver itself, not in k3s, unlike every other OIDC client.
 Plaintext half of Nextcloud's OIDC client secret pair — Authelia holds
 the matching hash (`home-infra/authelia`'s
 `authelia_oidc_nextcloud_client_secret_hash`; see that file's own
-"Rotating this pair" note). Never rotate this alone. Because this side
-lives in Ansible rather than Terraform, the redeploy step differs from
-Grafana/Open WebUI's: after `put-secret-value` on both this group and
-`home-infra/authelia`, `terraform apply` in `infra/k3s-apps` rolls
-Authelia, but reaching Nextcloud's own config needs a separate
-`ansible-playbook ansible/playbooks/site.yml --ask-become-pass` run
-against the homeserver (`infra/home-infra`) — confirm what that run
-actually templates before assuming it's needed (the `home-infra/
-monitoring` migration found live 2026-09-11 that a "consumed by
-Ansible" secret can still turn out to be assert-only, not templated
-anywhere).
+"Rotating this pair" note). Never rotate this alone.
+
+**Rotation**: generate a fresh plaintext + hash together (see
+`home-infra/authelia.md`'s own note for the exact command), then
+`infra/k3s-apps/scripts/rotate-oidc-client-secret.sh nextcloud` (script
+support added 2026-09-11 — this used to be a manual procedure). Unlike
+Grafana/Open WebUI, the script's own `terraform apply` only rolls
+Authelia's side here — Nextcloud AIO runs on the homeserver, not k3s,
+so there's no Deployment for it there. The script additionally re-runs
+`infra/home-infra`'s `site.yml` itself (`--ask-become-pass`, so it
+prompts for your sudo password when you run the script) so the new
+plaintext reaches Nextcloud's own `occ user_oidc:provider` config —
+confirmed live this is a real upsert, not a formality (unlike
+`home-infra/monitoring`'s SES creds, which turned out to be
+assert-only in Ansible and need no re-run at all).
 
 ## Automated rotation
 
