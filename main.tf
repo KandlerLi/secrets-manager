@@ -36,6 +36,10 @@ module "home_infra_open_webui" {
   source = "./secrets/home-infra/open-webui"
 }
 
+module "home_infra_home_agent" {
+  source = "./secrets/home-infra/home-agent"
+}
+
 # Refactored 2026-09-10 from a bare `resource` in the old
 # secrets_manager.tf into the per-secret module above -- a
 # within-state address change, no API call, prevent_destroy untouched.

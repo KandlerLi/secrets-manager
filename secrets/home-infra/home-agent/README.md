@@ -1,8 +1,10 @@
 # Secret: `home-infra/home-agent`
 
-**Terraform resource**: `aws_secretsmanager_secret.home_infra_home_agent`
-(`bootstrap/terraform-state/secrets_manager.tf` — migrating to `bootstrap/secrets-manager/`, see that repo's README migration-status table) — container only, no
-value.
+**Terraform resource**:
+`module.home_infra_home_agent.aws_secretsmanager_secret.this`, defined in
+`./main.tf` alongside this file (`bootstrap/secrets-manager`, the
+per-secret module dir). Migrated here from `bootstrap/terraform-state`
+2026-09-11 — container only, no value.
 
 **Consumed by**: `infra/k3s-apps`' `modules/home_agent`, read via
 `secrets.tf`. `home_agent_ghcr_token` is also reused directly by

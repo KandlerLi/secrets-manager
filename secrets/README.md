@@ -30,8 +30,9 @@ directory); its `.md` names where its `resource` block currently lives.
   client secret (Ansible-consumed, not Terraform)
 - [home-infra/ingress](home-infra/ingress.md) — the dormant shared
   Basic Auth rollback credential and the ACME DNS-01 IAM keypair
-- [home-infra/home-agent](home-infra/home-agent.md) — home_agent's
-  OpenAI/GHCR credentials and its nextcloud_tools app password
+- [home-infra/home-agent](home-infra/home-agent/README.md) —
+  home_agent's OpenAI/GHCR credentials and its nextcloud_tools app
+  password (**migrated**)
 - [home-infra/monitoring](home-infra/monitoring.md) — the SES SMTP
   identity (a derived, not chosen, password) and the ntfy topic
 - [home-infra/blocky](home-infra/blocky.md) — Blocky's own Postgres
