@@ -84,13 +84,23 @@ docker run --rm authelia/authelia:4.39.22 \
   --random --random.length 64 --random.charset alphanumeric
 ```
 This prints both the random plaintext and its pbkdf2 hash — keep both,
-they go to two different secrets. Full rotation order: `put-secret-value`
-the hash here, `put-secret-value` the plaintext in the client's own
-group, then `terraform apply` in `infra/k3s-apps` (rolls Authelia and
-the client Deployment together, so hash and plaintext land in sync —
-except Nextcloud, which needs a re-run of `infra/home-infra`'s
-`site.yml` instead, since its plaintext flows through Ansible, not
-Terraform).
+they go to two different secrets.
+
+**Grafana or Open WebUI**: feed both values to
+`infra/k3s-apps/scripts/rotate-oidc-client-secret.sh grafana` (or
+`openwebui`) — it writes both secrets and runs `terraform apply` (rolls
+Authelia and the client Deployment together, in sync), rejecting an
+obviously-swapped pair (a pbkdf2 hash always starts with `$`, the
+random plaintext never does).
+
+**Nextcloud** has no helper script (verified live 2026-09-11): its
+plaintext flows through `infra/home-infra`'s own Ansible, not
+Terraform, since Nextcloud AIO runs on the homeserver. Manual order:
+`put-secret-value` the hash here, `put-secret-value` the plaintext into
+`authelia_oidc_nextcloud_client_secret` in `home-infra/nextcloud`,
+`terraform apply` in `infra/k3s-apps` (Authelia's own side), then
+re-run `infra/home-infra`'s `site.yml` so the new plaintext reaches
+`nextcloud_aio`'s own OIDC config.
 
 ## Automated rotation
 

@@ -14,9 +14,16 @@ per-secret module dir). Migrated here from `bootstrap/terraform-state`
 ### `authelia_oidc_grafana_client_secret`
 The only key in this group. Plaintext half of Grafana's OIDC client
 secret pair — Authelia holds the matching hash (`home-infra/authelia`'s
-`authelia_oidc_grafana_client_secret_hash`; see that file's own
-"Rotating this pair" note for the full two-secret procedure and why
-order matters). Never rotate this alone.
+`authelia_oidc_grafana_client_secret_hash`). Never rotate this alone.
+
+**Rotation**: generate a fresh plaintext + hash together (see
+`home-infra/authelia.md`'s own note for the exact command), then
+`infra/k3s-apps/scripts/rotate-oidc-client-secret.sh grafana` — prompts
+silently for each value, rejects an obviously-swapped pair, writes both
+secrets, and runs `terraform apply` (rolls Authelia and Grafana
+together, in sync). Verify for real afterward (browser OIDC flow, can't
+be checked automatically): sign out, "Sign in with Authelia" must reach
+a real login/consent screen and land back in Grafana authenticated.
 
 ## Removed: `monitoring_grafana_admin_password` (2026-09-10)
 
@@ -37,4 +44,5 @@ Ansible default went away with it.
 `authelia_oidc_grafana_client_secret`: structurally resistant, same as
 every OIDC pair — needs a coordinated update with `home-infra/authelia`
 plus a Terraform apply, not something a scheduled job should do
-unattended.
+unattended. The helper script above is a manual-trigger convenience,
+not automation.
