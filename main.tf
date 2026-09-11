@@ -45,13 +45,3 @@ moved {
   to   = module.k3s_apps_sankey_export.aws_secretsmanager_secret.this
 }
 
-# TRANSIENT -- strip after the first apply imports the secret, then
-# re-plan and confirm "No changes" (ADR 0006 / ADR 0010 precedent).
-# Import ID is the full ARN (AWS provider v6 rejects a bare name); get
-# the current one with:
-#   aws secretsmanager describe-secret --secret-id home-infra/open-webui \
-#     --query ARN --output text --region eu-central-1
-import {
-  to = module.home_infra_open_webui.aws_secretsmanager_secret.this
-  id = "arn:aws:secretsmanager:eu-central-1:853955636908:secret:home-infra/open-webui-RSvc5G"
-}
