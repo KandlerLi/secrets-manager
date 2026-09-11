@@ -126,8 +126,8 @@ Terraform drops the resource from state with no delete API call. Never write
 |---|---|---|
 | `k3s-apps/sankey-export` | **yes (2026-09-10, pilot)** | value also rotated end-to-end via `infra/k3s-apps/scripts/rotate-sankey-export-app-password.sh` |
 | `home-infra/grafana` | **yes (2026-09-10)** | `monitoring_grafana_admin_password` retired in the same pass (dead — Grafana native login disabled); only the OIDC client secret remains |
+| `home-infra/open-webui` | **yes (2026-09-11)** | |
 | `home-infra/blocky` | no | + rotation automation (increment 2, lives in `infra/k3s-apps`) |
-| `home-infra/open-webui` | no | |
 | `home-infra/home-agent` | no | |
 | `home-infra/ingress` | no | |
 | `home-infra/monitoring` | no | dual consumer — verify Terraform + Ansible |

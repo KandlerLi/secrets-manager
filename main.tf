@@ -32,6 +32,10 @@ module "home_infra_grafana" {
   source = "./secrets/home-infra/grafana"
 }
 
+module "home_infra_open_webui" {
+  source = "./secrets/home-infra/open-webui"
+}
+
 # Refactored 2026-09-10 from a bare `resource` in the old
 # secrets_manager.tf into the per-secret module above -- a
 # within-state address change, no API call, prevent_destroy untouched.
@@ -45,9 +49,9 @@ moved {
 # re-plan and confirm "No changes" (ADR 0006 / ADR 0010 precedent).
 # Import ID is the full ARN (AWS provider v6 rejects a bare name); get
 # the current one with:
-#   aws secretsmanager describe-secret --secret-id home-infra/grafana \
+#   aws secretsmanager describe-secret --secret-id home-infra/open-webui \
 #     --query ARN --output text --region eu-central-1
 import {
-  to = module.home_infra_grafana.aws_secretsmanager_secret.this
-  id = "arn:aws:secretsmanager:eu-central-1:853955636908:secret:home-infra/grafana-RSvc5G"
+  to = module.home_infra_open_webui.aws_secretsmanager_secret.this
+  id = "arn:aws:secretsmanager:eu-central-1:853955636908:secret:home-infra/open-webui-REPLACE_WITH_REAL_SUFFIX"
 }
