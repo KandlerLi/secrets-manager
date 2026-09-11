@@ -1,15 +1,20 @@
 # Secret: `home-infra/monitoring`
 
-**Terraform resource**: `aws_secretsmanager_secret.home_infra_monitoring`
-(`bootstrap/terraform-state/secrets_manager.tf` — migrating to `bootstrap/secrets-manager/`, see that repo's README migration-status table) — container only, no
-value.
+**Terraform resource**:
+`module.home_infra_monitoring.aws_secretsmanager_secret.this`, defined
+in `./main.tf` alongside this file (`bootstrap/secrets-manager`, the
+per-secret module dir). Migrated here from `bootstrap/terraform-state`
+2026-09-11 — container only, no value.
 
 **Consumed by**: `infra/k3s-apps`' `modules/alertmanager` (SES creds)
 and `modules/authelia` (same SES identity, reused for Authelia's own
 password-reset emails rather than provisioning a second one), both via
 `secrets.tf`; also `infra/home-infra`'s own Ansible
 (`ansible/playbooks/site.yml`'s `pre_tasks`, gated on
-`monitoring_enabled`) for all three keys directly.
+`monitoring_enabled`) for all three keys directly — **the one group in
+this campaign with a real dual consumer**, so migrating its container
+needs a clean `infra/k3s-apps` plan *and* a clean
+`ansible-playbook --check` before it's considered verified.
 
 ## Keys
 

@@ -129,8 +129,8 @@ Terraform drops the resource from state with no delete API call. Never write
 | `home-infra/open-webui` | **yes (2026-09-11)** | |
 | `home-infra/home-agent` | **yes (2026-09-11)** | |
 | `home-infra/ingress` | **yes (2026-09-11)** | `shared_ingress_auth_password(_hash)` retired in the same pass, not migrated — see that group's README |
+| `home-infra/monitoring` | **yes (2026-09-11)** | dual consumer — Terraform (`k3s-apps`) and Ansible plan/lookup both verified clean |
 | `home-infra/blocky` | no | + rotation automation (increment 2, lives in `infra/k3s-apps`) |
-| `home-infra/monitoring` | no | dual consumer — verify Terraform + Ansible |
 | `home-infra/nextcloud` | no | Ansible-only consumer |
 | `home-infra/github-runner` | no | also switches the `k3s-bootstrap-local` grant to a wildcard string |
 | `home-infra/authelia` | no | last — 9 keys, highest blast radius |
