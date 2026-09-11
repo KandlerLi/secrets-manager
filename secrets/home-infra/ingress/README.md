@@ -13,13 +13,37 @@ per-secret module dir). Migrated here from `bootstrap/terraform-state`
 
 ### `k3s_ingress_acme_dns01_access_key_id` / `k3s_ingress_acme_dns01_secret_access_key`
 `dyndns`'s own `traefik-acme-dns01` IAM user credentials, scoped to
-exactly `route53:ChangeResourceRecordSets`/`GetChange` on the
-`jkandler.de` zone — used continuously for Let's Encrypt's DNS-01
-challenge, real certificate issuance/renewal. Rotate via
-`aws iam create-access-key` on that user, `put-secret-value`,
-`terraform apply`. Delete the old access key from IAM only after
-confirming the new one issued a real certificate — renewal runs
-continuously, so there's no safe credential-less window.
+exactly `route53:ChangeResourceRecordSets`/`GetChange`/
+`ListResourceRecordSets` on the `jkandler.de` zone — used for Let's
+Encrypt's DNS-01 challenge, real certificate issuance/renewal.
+
+**Rotation, real procedure (rotated live 2026-09-11)**: the access key
+is itself a Terraform resource in `aws/dyndns`
+(`aws_iam_access_key.acme_dns01`) — it has no in-place rotation, only
+destroy+recreate, and `lifecycle { create_before_destroy = true }` was
+added to it specifically so this can be done with zero
+credential-less window (IAM permits 2 access keys per user):
+
+```bash
+# in aws/dyndns, against its own state
+terraform apply -replace=aws_iam_access_key.acme_dns01
+```
+
+Then `terraform output -raw acme_dns01_access_key_id`/
+`acme_dns01_secret_access_key`, `put-secret-value` the pair into this
+group, `terraform apply` in `infra/k3s-apps`. The old key is already
+gone from IAM by this point (destroyed as part of the `-replace`, not
+a separate manual step afterward) — `checksum/acme-dns01-credentials`
+on `modules/ingress`'s Deployment (added 2026-09-11, after this exact
+rotation caught the gap live: the Secret updated but the already-running
+Pod kept the just-deleted key in memory until a manual restart) rolls
+a fresh Pod automatically once the Secret changes, so there's nothing
+left to do by hand. Verify for real, not just a clean `terraform
+apply`: the new key's actual Route53 permissions, e.g. a throwaway
+`UPSERT`/`DELETE` TXT record round-trip with the new credentials
+directly (`aws route53 change-resource-record-sets` +
+`wait resource-record-sets-changed`) — a clean apply only proves the
+Secret updated, not that the key can actually do what `lego` needs.
 
 ## Removed: `shared_ingress_auth_password` / `shared_ingress_auth_password_hash` (2026-09-11)
 
@@ -48,5 +72,14 @@ drill, or rebuilding the old middleware from git history
 
 ## Automated rotation
 
-`k3s_ingress_acme_dns01_*`: worth automating — mechanically simple IAM
-key rotation, low blast radius. Not yet built.
+`k3s_ingress_acme_dns01_*`: still worth automating, and now genuinely
+easy — proven live 2026-09-11 as a clean three-command sequence
+(`terraform apply -replace` in `aws/dyndns`, `put-secret-value`,
+`terraform apply` in `infra/k3s-apps`), with `create_before_destroy`
+and the new checksum annotation together removing the two things that
+would otherwise make this unsafe to run unattended (a credential-less
+window, a stale Pod not picking up the new key). Not yet built — the
+one piece a scheduled job can't do unattended is the real functional
+verification (the throwaway Route53 record round-trip), so it would
+need to trust the mechanics rather than re-prove them each run, or
+build a scripted version of that same round-trip check.
