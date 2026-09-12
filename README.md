@@ -134,7 +134,11 @@ Terraform drops the resource from state with no delete API call. Never write
 | `home-infra/github-runner` | **yes (2026-09-12)** | also switched the `k3s-bootstrap-local` grant to a wildcard string |
 | `dyndns/fritzbox` | **yes (2026-09-12)** | the one group whose source root isn't `bootstrap/terraform-state` — see below |
 | `home-infra/blocky` | **yes (2026-09-12)** | + rotation automation (increment 2, lives in `infra/k3s-apps`) |
-| `home-infra/authelia` | no | last — 9 keys, highest blast radius |
+| `home-infra/authelia` | **yes (2026-09-12)** | last group — 9 keys, highest blast radius |
+
+`k3s-apps/ghcr-pull-token` isn't in this table — it's a genuinely new
+secret, not a migration (split out of `home-infra/home-agent`
+2026-09-12; see `secrets/k3s-apps/ghcr-pull-token/README.md`).
 
 `dyndns/fritzbox` didn't come from `bootstrap/terraform-state/
 secrets_manager.tf` at all — it was created directly in `aws/dyndns`
@@ -143,16 +147,20 @@ campaign with that shape. Same no-destroy handoff, just with the
 "source relinquishes" half going through a normal `aws/dyndns` PR
 ([#26](https://github.com/KandlerLi/dyndns/pull/26)) instead of a
 direct local apply — and its `removed` block lives there permanently,
-not in `bootstrap/terraform-state`, so it's outside the final-sweep
+not in `bootstrap/terraform-state`, so it was outside the final-sweep
 count below.
 
-Final sweep once the original 10 (everything except `dyndns/fritzbox`)
-are migrated and stable: delete
-`bootstrap/terraform-state/secrets_manager.tf` and all 10 `removed`
-blocks. `operator.tf`'s `ManageSecretsManagerSecrets` statement stays — by then
-it's 10 wildcard ARN strings (`...:secret:home-infra/*` /
-`...:secret:k3s-apps/*` could collapse it to two, a judgement call at
-that point).
+**Final sweep done, 2026-09-12**: all 10 original groups (everything
+except `dyndns/fritzbox`, which relinquishes in `aws/dyndns` itself)
+migrated and stable — `bootstrap/terraform-state/secrets_manager.tf`
+and all 10 `removed` blocks it held are deleted outright.
+`operator.tf`'s `ManageSecretsManagerSecrets` statement stays
+permanently, exactly as anticipated: `julian`'s read/write grant on
+these secrets doesn't move with the container between repos, so it
+remains 10 wildcard ARN strings there regardless of which repo owns
+each container (collapsing `...:secret:home-infra/*` /
+`...:secret:k3s-apps/*` into two was considered and declined — the
+per-secret entries are more legible and cost nothing extra).
 
 ## Rotation
 

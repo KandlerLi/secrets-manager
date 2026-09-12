@@ -28,8 +28,9 @@ has only a `.md` file here (no directory); its `.md` names where its
   the same pass) (**migrated**)
 - [home-infra/open-webui](home-infra/open-webui/README.md) — Open
   WebUI's OIDC client secret (**migrated**)
-- [home-infra/authelia](home-infra/authelia.md) — Authelia's own
+- [home-infra/authelia](home-infra/authelia/README.md) — Authelia's own
   session/storage/OIDC crypto material, plus one personal login
+  (**migrated**)
 - [home-infra/nextcloud](home-infra/nextcloud/README.md) — Nextcloud's
   OIDC client secret (Ansible-consumed, not Terraform) (**migrated**)
 - [home-infra/home-agent](home-infra/home-agent/README.md) —
