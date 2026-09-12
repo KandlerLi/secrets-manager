@@ -68,6 +68,10 @@ module "k3s_apps_ghcr_pull_token" {
   source = "./secrets/k3s-apps/ghcr-pull-token"
 }
 
+module "home_infra_authelia" {
+  source = "./secrets/home-infra/authelia"
+}
+
 # Refactored 2026-09-10 from a bare `resource` in the old
 # secrets_manager.tf into the per-secret module above -- a
 # within-state address change, no API call, prevent_destroy untouched.
