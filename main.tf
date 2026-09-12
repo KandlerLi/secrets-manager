@@ -60,6 +60,10 @@ module "dyndns_fritzbox" {
   source = "./secrets/dyndns/fritzbox"
 }
 
+module "home_infra_blocky" {
+  source = "./secrets/home-infra/blocky"
+}
+
 # Refactored 2026-09-10 from a bare `resource` in the old
 # secrets_manager.tf into the per-secret module above -- a
 # within-state address change, no API call, prevent_destroy untouched.

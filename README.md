@@ -133,7 +133,7 @@ Terraform drops the resource from state with no delete API call. Never write
 | `home-infra/nextcloud` | **yes (2026-09-11)** | Ansible-only consumer, verified via a direct lookup test |
 | `home-infra/github-runner` | **yes (2026-09-12)** | also switched the `k3s-bootstrap-local` grant to a wildcard string |
 | `dyndns/fritzbox` | **yes (2026-09-12)** | the one group whose source root isn't `bootstrap/terraform-state` — see below |
-| `home-infra/blocky` | no | + rotation automation (increment 2, lives in `infra/k3s-apps`) |
+| `home-infra/blocky` | **yes (2026-09-12)** | + rotation automation (increment 2, lives in `infra/k3s-apps`) |
 | `home-infra/authelia` | no | last — 9 keys, highest blast radius |
 
 `dyndns/fritzbox` didn't come from `bootstrap/terraform-state/
