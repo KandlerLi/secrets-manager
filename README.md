@@ -132,12 +132,24 @@ Terraform drops the resource from state with no delete API call. Never write
 | `home-infra/monitoring` | **yes (2026-09-11)** | dual consumer — Terraform (`k3s-apps`) and Ansible plan/lookup both verified clean |
 | `home-infra/nextcloud` | **yes (2026-09-11)** | Ansible-only consumer, verified via a direct lookup test |
 | `home-infra/github-runner` | **yes (2026-09-12)** | also switched the `k3s-bootstrap-local` grant to a wildcard string |
+| `dyndns/fritzbox` | **yes (2026-09-12)** | the one group whose source root isn't `bootstrap/terraform-state` — see below |
 | `home-infra/blocky` | no | + rotation automation (increment 2, lives in `infra/k3s-apps`) |
 | `home-infra/authelia` | no | last — 9 keys, highest blast radius |
 
-Final sweep once all 10 are migrated and stable: delete
-`bootstrap/terraform-state/secrets_manager.tf` and all 10 `removed` blocks.
-`operator.tf`'s `ManageSecretsManagerSecrets` statement stays — by then
+`dyndns/fritzbox` didn't come from `bootstrap/terraform-state/
+secrets_manager.tf` at all — it was created directly in `aws/dyndns`
+(a real CI/PR-gated repo), the first and so far only secret in this
+campaign with that shape. Same no-destroy handoff, just with the
+"source relinquishes" half going through a normal `aws/dyndns` PR
+([#26](https://github.com/KandlerLi/dyndns/pull/26)) instead of a
+direct local apply — and its `removed` block lives there permanently,
+not in `bootstrap/terraform-state`, so it's outside the final-sweep
+count below.
+
+Final sweep once the original 10 (everything except `dyndns/fritzbox`)
+are migrated and stable: delete
+`bootstrap/terraform-state/secrets_manager.tf` and all 10 `removed`
+blocks. `operator.tf`'s `ManageSecretsManagerSecrets` statement stays — by then
 it's 10 wildcard ARN strings (`...:secret:home-infra/*` /
 `...:secret:k3s-apps/*` could collapse it to two, a judgement call at
 that point).

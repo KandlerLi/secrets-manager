@@ -10,12 +10,14 @@ them, and exactly how to rotate each one. See
 cross-cutting rotation categories and automated-rotation feasibility
 these draw from.
 
-The containers are being migrated out of
-`bootstrap/terraform-state/secrets_manager.tf` into a directory here
-one group at a time — see this repo's own `README.md` for the
-migration-status table and the `removed`/`import` handoff procedure.
-Until a group has migrated it has only a `.md` file here (no
-directory); its `.md` names where its `resource` block currently lives.
+The containers are being migrated in here one group at a time — mostly
+out of `bootstrap/terraform-state/secrets_manager.tf`, but not always:
+`dyndns/fritzbox` came from `aws/dyndns` itself, a real CI/PR-gated
+repo, the same no-destroy handoff just applied to a different kind of
+source root. See this repo's own `README.md` for the migration-status
+table and the `removed`/`import` handoff procedure. Until a group has
+migrated it has only a `.md` file here (no directory); its `.md` names
+where its `resource` block currently lives.
 
 - [k3s-apps/sankey-export](k3s-apps/sankey-export/README.md) — the
   sankey-export CronJob's Nextcloud app password (**migrated**)
@@ -42,6 +44,10 @@ directory); its `.md` names where its `resource` block currently lives.
   `k3s-bootstrap-local` scripted identity (**migrated**)
 - [home-infra/blocky](home-infra/blocky.md) — Blocky's own Postgres
   password
+- [dyndns/fritzbox](dyndns/fritzbox/README.md) — the FRITZ!Box
+  router's own HTTP Basic Auth credentials, the only secret here whose
+  source root is `aws/dyndns` rather than `bootstrap/terraform-state`
+  (**migrated**)
 
 Every container has `lifecycle { prevent_destroy = true }` — these are
 foundational, load-bearing resources for every service migrated off
