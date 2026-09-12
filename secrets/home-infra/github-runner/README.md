@@ -1,16 +1,19 @@
 # Secret: `home-infra/github-runner`
 
-**Terraform resource**: `aws_secretsmanager_secret.home_infra_github_runner`
-(`bootstrap/terraform-state/secrets_manager.tf` — migrating to `bootstrap/secrets-manager/`, see that repo's README migration-status table) — container only, no
-value.
+**Terraform resource**:
+`module.home_infra_github_runner.aws_secretsmanager_secret.this`,
+defined in `./main.tf` alongside this file (`bootstrap/secrets-manager`,
+the per-secret module dir). Migrated here from
+`bootstrap/terraform-state` 2026-09-12 — container only, no value.
 
 **Consumed by**: `bootstrap/k3s-bootstrap`'s `modules/github_runner`,
 read via that repo's own `secrets.tf`. The `k3s-bootstrap-local` IAM
 identity that applies that repo has a dedicated, **read-only** grant
-on this one secret (`bootstrap/terraform-state/k3s_bootstrap_local.tf`)
-— unlike `julian`'s own read/write grant on every other secret here,
-since `k3s-bootstrap-local` is a scripted, non-interactive identity;
-only `julian`'s own credentials edit/rotate this value.
+on this one secret (`bootstrap/terraform-state/k3s_bootstrap_local.tf`,
+a wildcard ARN string as of this migration — same pattern as `julian`'s
+own grant on every migrated secret) — unlike `julian`'s own read/write
+grant, since `k3s-bootstrap-local` is a scripted, non-interactive
+identity; only `julian`'s own credentials edit/rotate this value.
 
 ## Keys
 

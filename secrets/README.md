@@ -37,10 +37,11 @@ directory); its `.md` names where its `resource` block currently lives.
 - [home-infra/monitoring](home-infra/monitoring/README.md) — the SES
   SMTP identity (a derived, not chosen, password) and the ntfy topic
   (**migrated**)
+- [home-infra/github-runner](home-infra/github-runner/README.md) —
+  the shared GitHub Actions runner PAT, read by the
+  `k3s-bootstrap-local` scripted identity (**migrated**)
 - [home-infra/blocky](home-infra/blocky.md) — Blocky's own Postgres
   password
-- [home-infra/github-runner](home-infra/github-runner.md) — the
-  shared GitHub Actions runner PAT
 
 Every container has `lifecycle { prevent_destroy = true }` — these are
 foundational, load-bearing resources for every service migrated off

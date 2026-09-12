@@ -52,6 +52,10 @@ module "home_infra_nextcloud" {
   source = "./secrets/home-infra/nextcloud"
 }
 
+module "home_infra_github_runner" {
+  source = "./secrets/home-infra/github-runner"
+}
+
 # Refactored 2026-09-10 from a bare `resource` in the old
 # secrets_manager.tf into the per-secret module above -- a
 # within-state address change, no API call, prevent_destroy untouched.
