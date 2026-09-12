@@ -14,10 +14,12 @@ The containers are being migrated in here one group at a time — mostly
 out of `bootstrap/terraform-state/secrets_manager.tf`, but not always:
 `dyndns/fritzbox` came from `aws/dyndns` itself, a real CI/PR-gated
 repo, the same no-destroy handoff just applied to a different kind of
-source root. See this repo's own `README.md` for the migration-status
-table and the `removed`/`import` handoff procedure. Until a group has
-migrated it has only a `.md` file here (no directory); its `.md` names
-where its `resource` block currently lives.
+source root; `k3s-apps/ghcr-pull-token` isn't a migration at all, a
+genuinely new secret split out of `home-infra/home-agent`'s own group.
+See this repo's own `README.md` for the migration-status table and the
+`removed`/`import` handoff procedure. Until a group has migrated it
+has only a `.md` file here (no directory); its `.md` names where its
+`resource` block currently lives.
 
 - [k3s-apps/sankey-export](k3s-apps/sankey-export/README.md) — the
   sankey-export CronJob's Nextcloud app password (**migrated**)
@@ -31,8 +33,8 @@ where its `resource` block currently lives.
 - [home-infra/nextcloud](home-infra/nextcloud/README.md) — Nextcloud's
   OIDC client secret (Ansible-consumed, not Terraform) (**migrated**)
 - [home-infra/home-agent](home-infra/home-agent/README.md) —
-  home_agent's OpenAI/GHCR credentials and its nextcloud_tools app
-  password (**migrated**)
+  home_agent's OpenAI API key and its nextcloud_tools app password
+  (**migrated**)
 - [home-infra/ingress](home-infra/ingress/README.md) — the ACME
   DNS-01 IAM keypair (the dormant shared Basic Auth rollback
   credential was retired, not migrated) (**migrated**)
@@ -48,6 +50,10 @@ where its `resource` block currently lives.
   router's own HTTP Basic Auth credentials, the only secret here whose
   source root is `aws/dyndns` rather than `bootstrap/terraform-state`
   (**migrated**)
+- [k3s-apps/ghcr-pull-token](k3s-apps/ghcr-pull-token/README.md) — the
+  account-scoped GHCR pull token shared by `modules/home_agent` and
+  `modules/sankey_export`, split out of `home-infra/home-agent`
+  (**created, not migrated**)
 
 Every container has `lifecycle { prevent_destroy = true }` — these are
 foundational, load-bearing resources for every service migrated off

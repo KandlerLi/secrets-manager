@@ -8,7 +8,10 @@ per-secret module dir). Migrated here from `bootstrap/terraform-state`
 container only, no value.
 
 **Consumed by**: `infra/k3s-apps`' `modules/sankey_export`, read via
-`secrets.tf`.
+`secrets.tf`. This module's own image pull also depends on a second,
+separate secret — `k3s-apps/ghcr-pull-token`, shared with
+`modules/home_agent` — not documented here since this file only covers
+what's actually in this group's own JSON.
 
 ## Keys
 
@@ -66,4 +69,4 @@ section.
 **So**: everything after the mint is automated
 (`scripts/rotate-sankey-export-app-password.sh`); the mint stays one
 manual `occ` line. Same practical ceiling as
-`home-infra/home-agent.md`'s `nextcloud_tools_app_password`.
+`home-infra/home-agent`'s own `nextcloud_tools_app_password`.
