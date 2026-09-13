@@ -1,0 +1,26 @@
+name: Apply
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  # See checks.yml's own identical comment: a caller's permissions cap
+  # every nested job inside the reusable workflow, and build-image
+  # needs write to push to GHCR.
+  packages: write
+
+concurrency:
+  group: secrets-manager-terraform
+  cancel-in-progress: false
+
+jobs:
+  terraform:
+    uses: KandlerLi/gha-common/.github/workflows/terraform-apply.yml@v0.0.7
+    with:
+      aws_region: eu-central-1
+    secrets: inherit
