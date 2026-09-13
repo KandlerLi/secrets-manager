@@ -21,6 +21,11 @@ scoped to exactly `CreateSecret`/`DescribeSecret` on the name prefixes
 it already manages — a compromised run can create a bogus empty
 container at worst, never read or write an actual secret value.
 
+Moved from `bootstrap/` to `aws/` locally the same day, once the
+CI-apply change made it fit `aws/`'s own grouping criterion (real AWS
+resources, Terraform-managed, CI-applied) better than `bootstrap/`'s —
+no GitHub-side rename, this is purely local directory grouping.
+
 ## Why a separate root
 
 These containers were created by the SOPS-to-AWS-Secrets-Manager cutover in

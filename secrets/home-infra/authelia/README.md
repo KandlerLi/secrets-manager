@@ -2,7 +2,7 @@
 
 **Terraform resource**:
 `module.home_infra_authelia.aws_secretsmanager_secret.this`, defined
-in `./main.tf` alongside this file (`bootstrap/secrets-manager`, the
+in `./main.tf` alongside this file (`aws/secrets-manager`, the
 per-secret module dir). Migrated here from `bootstrap/terraform-state`
 2026-09-12 — the last group in the campaign — container only, no
 value; the value is set out-of-band via `aws secretsmanager
