@@ -7,9 +7,19 @@ only, never a value. Real secret material is set out-of-band via
 plaintext git); there is no `aws_secretsmanager_secret_version` resource
 anywhere here.
 
-Third foundational bootstrap-category root beside `bootstrap/terraform-state`
-and `bootstrap/k3s-bootstrap`: rare changes, applied only locally by a human,
-never CI.
+Bootstrap-category by origin (created by the same SOPS-to-Secrets-Manager
+cutover as `bootstrap/terraform-state`/`bootstrap/k3s-bootstrap`), but
+**CI-applied since 2026-09-13**, unlike those two — it doesn't share
+their self-escalation risk. It never touches IAM at all; `julian`'s own
+read/write grant on every secret lives entirely in
+`bootstrap/terraform-state/operator.tf`, deliberately kept out of this
+repo (see "IAM grants live in terraform-state, not here" below). It only
+ever creates empty `aws_secretsmanager_secret` containers — no
+`GetSecretValue`/`PutSecretValue`/`DeleteSecret` anywhere in its
+Terraform. Its own CI role (`github/repo-infra/aws_policies.tf`) is
+scoped to exactly `CreateSecret`/`DescribeSecret` on the name prefixes
+it already manages — a compromised run can create a bogus empty
+container at worst, never read or write an actual secret value.
 
 ## Why a separate root
 
@@ -38,17 +48,25 @@ region: eu-central-1
 
 ## Apply model
 
-Applied only as **root / an admin-equivalent identity**, never as `julian`
-(same self-escalation reasoning as `bootstrap/terraform-state`'s own
-`operator.tf` header and ADR 0018 — `julian`'s operator policy is scoped
-to `repo-infra/*` state and cannot touch this root's state; **do not add
-a grant for this key**). No scripted/CI identity exists for this root.
+**CI-applied on merge, same as `infra/k3s-apps`** — PR review is the
+gate, `.github/workflows/apply.yml` runs `terraform apply` via this
+repo's own dedicated OIDC role (`secrets-manager-github-actions`,
+`github/repo-infra/aws_policies.tf`). No `scripts/roll-out.sh` any
+more — retired 2026-09-13 once CI took over the routine path, the same
+way no such script ever existed for `k3s-apps` once its own CI landed
+(this workspace's convention is not to keep a maintained local-apply
+script around once CI covers the same ground, matching how
+`aws/dyndns`'s own `protect-repository.sh` was deleted outright rather
+than kept as a documented exception). A genuine emergency can still
+fall back to plain local `terraform init/plan/apply` as root — just not
+a routine, scripted path.
 
-```bash
-aws login            # as root, first
-scripts/roll-out.sh plan
-scripts/roll-out.sh apply
-```
+`julian`'s own operator policy is still deliberately scoped to
+`repo-infra/*` state only and cannot touch this root's state (ADR
+0018's self-escalation guarantee) — that constraint is about `julian`
+specifically, not about CI existing. This root's own CI role is a
+separate, narrowly-scoped identity with no relationship to `julian`'s
+own permissions at all.
 
 ## IAM grants live in `terraform-state`, not here
 
@@ -70,6 +88,12 @@ Consumers (`infra/k3s-apps/secrets.tf`, `bootstrap/k3s-bootstrap/secrets.tf`,
 name / ARN-pattern string**, never by Terraform resource reference — they
 need **zero changes** as secrets migrate here.
 
+A third location, distinct from both of the above: **this repo's own**
+CI role's grant (`CreateSecret`/`DescribeSecret`, not `GetSecretValue`/
+`PutSecretValue`) also lives in `github/repo-infra/aws_policies.tf`, not
+here — same convention every other repo's CI permissions already
+follow.
+
 ## Per-secret migration procedure (the no-destroy handoff)
 
 Follows the ADR 0006 / ADR 0010 pattern (the `aws-account-bootstrap` →
@@ -88,9 +112,10 @@ Follows the ADR 0006 / ADR 0010 pattern (the `aws-account-bootstrap` →
    block. The import ID must be the **ARN**, not the secret name (AWS
    provider v6 rejects the name); get it with
    `aws secretsmanager describe-secret --secret-id <name> --query ARN --output text`.
-3. `scripts/roll-out.sh plan` → must show exactly
-   `1 to import, 0 to add/change/destroy`. `apply`. Delete the `import`
-   block; commit; `plan` → "No changes."
+3. Open a PR — `checks.yml`'s plan job must show exactly
+   `1 to import, 0 to add/change/destroy`. Merge (CI applies). Delete
+   the `import` block in a follow-up PR; its own plan job → "No
+   changes."
 
 **Phase B — `terraform-state` relinquishes (only after A is verified):**
 4. In `bootstrap/terraform-state`: replace the `resource` block with
