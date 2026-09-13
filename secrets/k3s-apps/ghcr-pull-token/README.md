@@ -2,7 +2,7 @@
 
 **Terraform resource**:
 `module.k3s_apps_ghcr_pull_token.aws_secretsmanager_secret.this`,
-defined in `./main.tf` alongside this file (`bootstrap/secrets-manager`,
+defined in `./main.tf` alongside this file (`aws/secrets-manager`,
 the per-secret module dir). Created 2026-09-12 — container only, no
 value. **Not a migration**: this key was split out of
 `home-infra/home-agent`'s own group the same day, the first time this

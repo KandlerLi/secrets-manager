@@ -2,7 +2,7 @@
 
 **Terraform resource**:
 `module.home_infra_grafana.aws_secretsmanager_secret.this`, defined in
-`./main.tf` alongside this file (`bootstrap/secrets-manager`, the
+`./main.tf` alongside this file (`aws/secrets-manager`, the
 per-secret module dir). Migrated here from `bootstrap/terraform-state`
 2026-09-10 — container only, no value.
 

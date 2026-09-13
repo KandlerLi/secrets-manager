@@ -2,7 +2,7 @@
 
 **Terraform resource**:
 `module.dyndns_fritzbox.aws_secretsmanager_secret.this`, defined in
-`./main.tf` alongside this file (`bootstrap/secrets-manager`, the
+`./main.tf` alongside this file (`aws/secrets-manager`, the
 per-secret module dir). Migrated here from `aws/dyndns` 2026-09-12 —
 container only, no value. The only secret in this repo whose source
 root is a real CI/PR-gated repo rather than a bootstrap-category one;

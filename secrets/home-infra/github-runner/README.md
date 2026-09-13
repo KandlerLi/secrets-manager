@@ -2,7 +2,7 @@
 
 **Terraform resource**:
 `module.home_infra_github_runner.aws_secretsmanager_secret.this`,
-defined in `./main.tf` alongside this file (`bootstrap/secrets-manager`,
+defined in `./main.tf` alongside this file (`aws/secrets-manager`,
 the per-secret module dir). Migrated here from
 `bootstrap/terraform-state` 2026-09-12 — container only, no value.
 
