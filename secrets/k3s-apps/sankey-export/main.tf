@@ -8,6 +8,10 @@
 # resource. lifecycle.prevent_destroy, matching every foundational
 # resource in this workspace.
 
+# AWS-0098 (should use a customer managed key) suppressed, not fixed --
+# see this repo's own README.md, "Trivy AWS-0098 (customer-managed key)
+# suppressed, not fixed" for why.
+#trivy:ignore:AVD-AWS-0098
 resource "aws_secretsmanager_secret" "this" {
   name                    = "k3s-apps/sankey-export"
   description             = "sankey_export CronJob's own Nextcloud app password"

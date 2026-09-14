@@ -12,6 +12,10 @@
 # other foundational secret in this workspace, corrected on the move
 # rather than carried over.
 
+# AWS-0098 (should use a customer managed key) suppressed, not fixed --
+# see this repo's own README.md, "Trivy AWS-0098 (customer-managed key)
+# suppressed, not fixed" for why.
+#trivy:ignore:AVD-AWS-0098
 resource "aws_secretsmanager_secret" "this" {
   name                    = "dyndns/fritzbox"
   description             = "HTTP Basic credentials used by the FRITZ!Box DynDNS client"
