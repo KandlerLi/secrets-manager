@@ -16,6 +16,10 @@
 # SQLite storage issue it existed to hedge against). Only the ACME
 # DNS-01 keypair remains.
 
+# AWS-0098 (should use a customer managed key) suppressed, not fixed --
+# see this repo's own README.md, "Trivy AWS-0098 (customer-managed key)
+# suppressed, not fixed" for why.
+#trivy:ignore:AVD-AWS-0098
 resource "aws_secretsmanager_secret" "this" {
   name                    = "home-infra/ingress"
   description             = "The ACME DNS-01 Route53 IAM keypair (dyndns's own traefik-acme-dns01 user)"

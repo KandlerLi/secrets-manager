@@ -8,6 +8,10 @@
 # resource. lifecycle.prevent_destroy, matching every foundational
 # resource in this workspace.
 
+# AWS-0098 (should use a customer managed key) suppressed, not fixed --
+# see this repo's own README.md, "Trivy AWS-0098 (customer-managed key)
+# suppressed, not fixed" for why.
+#trivy:ignore:AVD-AWS-0098
 resource "aws_secretsmanager_secret" "this" {
   name                    = "home-infra/nextcloud"
   description             = "Nextcloud's own Authelia OIDC client secret (consumed by infra/home-infra's Ansible only -- Nextcloud AIO stays on the homeserver, not k3s)"

@@ -192,6 +192,32 @@ each container (collapsing `...:secret:home-infra/*` /
 `...:secret:k3s-apps/*` into two was considered and declined — the
 per-secret entries are more legible and cost nothing extra).
 
+## Trivy AWS-0098 (customer-managed key) suppressed, not fixed
+
+Every secret container here trips AWS-0098 ("Secrets Manager should
+use customer managed keys") -- deliberately left unfixed, decided
+2026-09-14. LOW severity, and these are containers only (no
+`aws_secretsmanager_secret_version` anywhere in this repo -- real
+values are set out-of-band, Terraform never even handles plaintext).
+
+What actually makes this different from every other trivy fix in this
+workspace's security-audit rollout: Secrets Manager's KMS key has to be
+usable directly by every principal that reads or writes a secret
+*value*, not routed through a single AWS service principal the way
+CloudWatch Logs/CloudTrail/SNS are. Tracing the real consumers turned
+up 5 separate IAM identities across 4 repos that would all need new KMS
+grants to keep working: `julian` (`bootstrap/terraform-state/
+operator.tf`, read/write on all 12), `dyndns`'s own Lambda role
+(`dyndns/fritzbox`), `k3s-apps`'s CI role (8 of the `home-infra/*`
+groups plus both `k3s-apps/*` ones), and `home_infra_local`/
+`k3s_bootstrap_local` (`bootstrap/terraform-state`, `home-infra/
+monitoring`+`nextcloud` and `home-infra/github-runner` respectively).
+Missing even one of those grants means that principal silently loses
+the ability to decrypt a secret it depends on. Not proportionate to
+fix for a LOW-severity, metadata-only finding -- revisit only if the
+real risk profile changes (e.g. these containers start holding
+anything more sensitive than they do today).
+
 ## Rotation
 
 Per-secret rotation procedures: `secrets/`. Cross-cutting rotation categories
