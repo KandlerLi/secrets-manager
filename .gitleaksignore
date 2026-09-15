@@ -1,0 +1,15 @@
+# gitleaks false positives, confirmed 2026-09-15 -- see the workspace-
+# level PARKED.md "Security audit" entry for the full triage.
+#
+# secrets/dyndns/fritzbox/README.md:1 is a doc heading naming this
+# Secrets Manager container's own path, not a secret value (see that
+# file for the exact text) -- No aws_secretsmanager_secret_version
+# anywhere in this repo; real values are set out-of-band.
+cbaa2e7ee45f8fc7a3ef66de927cd3df5f22949e:secrets/dyndns/fritzbox/README.md:generic-api-key:1
+#
+# The first version of this very file (commit 391ad6e) quoted that
+# heading verbatim in its own comment -- gitleaks flagged that too, a
+# new file/line with no fingerprint of its own on the already-pushed
+# commit that introduced it (this workspace never rewrites history,
+# fixes forward instead).
+391ad6e97f566dabf58cf7757ea1f19b9e88d455:.gitleaksignore:generic-api-key:4
