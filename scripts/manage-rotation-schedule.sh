@@ -74,7 +74,7 @@ fi
 
 echo "Regenerating ${markdown_file}..."
 
-today_epoch="$(date -u +%s)"
+generated_on="$(date -u +%F)"
 tmp_rows="$(mktemp)"
 trap 'rm -f "${tmp_rows}"' EXIT
 
@@ -86,17 +86,21 @@ for i in $(seq 0 $((count - 1))); do
   last_rotated="$(echo "${entry}" | jq -r '.last_rotated')"
   interval="$(echo "${entry}" | jq -r '.rotate_every_days')"
 
-  expiry_epoch="$(date -u -d "${last_rotated} +${interval} days" +%s)" \
+  # next_due is an absolute date -- unlike a "days left" count, it stays
+  # equally meaningful whether this file was regenerated today or months
+  # ago (this script has no schedule of its own; check-secret-rotation.yml
+  # is what actually watches this daily). Sorted on directly below, not a
+  # separately-computed days-left number: it's already YYYY-MM-DD, so a
+  # plain lexicographic sort is already a correct chronological one.
+  next_due="$(date -u -d "${last_rotated} +${interval} days" +%F)" \
     || fail "${id}: invalid last_rotated/rotate_every_days"
-  days_left=$(((expiry_epoch - today_epoch) / 86400))
-  next_due="$(date -u -d "@${expiry_epoch}" +%F)"
 
   # Escape the one character that would actually break a table cell --
   # a literal "|" -- everything else (backticks, parens) is fine as-is.
   description="${description//|/\\|}"
 
-  printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "${days_left}" "${id}" "${last_rotated}" "${next_due}" "${description}" "${runbook_url}" \
+  printf '%s\t%s\t%s\t%s\t%s\n' \
+    "${next_due}" "${id}" "${last_rotated}" "${description}" "${runbook_url}" \
     >>"${tmp_rows}"
 done
 
@@ -106,15 +110,19 @@ done
   echo
   echo "# Secret rotation schedule"
   echo
-  echo "Sorted soonest-to-expire first (a negative \"Days left\" means it's" \
-    "already overdue). Machine-readable source: [rotation-schedule.json](rotation-schedule.json)." \
-    "Full mechanism: [README.md](README.md)'s own Rotation section."
+  echo "Generated ${generated_on}. Sorted soonest-due first -- compare \"Next" \
+    "due\" against today's own date to see what's overdue; this file has no" \
+    "schedule of its own, so a relative day-count here would go stale the" \
+    "moment time passes without a re-run (check-secret-rotation.yml is what" \
+    "actually watches this daily). Machine-readable source:" \
+    "[rotation-schedule.json](rotation-schedule.json). Full mechanism:" \
+    "[README.md](README.md)'s own Rotation section."
   echo
-  echo "| Days left | Secret | Last rotated | Next due | Description | Runbook |"
-  echo "|---:|---|---|---|---|---|"
-  sort -t "$(printf '\t')" -k1,1n "${tmp_rows}" | while IFS="$(printf '\t')" read -r days id last_rotated next_due description runbook_url; do
-    printf '| %s | `%s` | %s | %s | %s | [link](%s) |\n' \
-      "${days}" "${id}" "${last_rotated}" "${next_due}" "${description}" "${runbook_url}"
+  echo "| Next due | Secret | Last rotated | Description | Runbook |"
+  echo "|---|---|---|---|---|"
+  sort -t "$(printf '\t')" -k1,1 "${tmp_rows}" | while IFS="$(printf '\t')" read -r next_due id last_rotated description runbook_url; do
+    printf '| %s | `%s` | %s | %s | [link](%s) |\n' \
+      "${next_due}" "${id}" "${last_rotated}" "${description}" "${runbook_url}"
   done
 } >"${markdown_file}"
 
