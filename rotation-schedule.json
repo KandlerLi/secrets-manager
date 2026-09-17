@@ -1,0 +1,11 @@
+{
+  "_comment": "Manually-maintained rotation schedule for BACKLOG.md's own 'Manually-rotated Secrets Manager secrets have no rotation reminder' entry -- see README.md's own Rotation section. Only lists secrets with a genuine calendar-driven deadline (GitHub's own enforced PAT expiry, or a self-imposed hygiene interval worth tracking) -- not every secret in this repo belongs here. .github/workflows/check-secret-rotation.yml reads this daily and emails a reminder once a secret is within 7 days of last_rotated + rotate_every_days. Rotate the real credential first, then update last_rotated here to today's date in the same change -- this file only ever reflects what's already true, it doesn't drive rotation itself.",
+  "secrets": [
+    {
+      "id": "k3s-apps/ghcr-pull-token",
+      "description": "GHCR pull token (classic PAT) shared by infra/k3s-apps' modules/home_agent and modules/sankey_export -- GitHub enforces a hard 90-day expiry on this token itself, not a self-imposed policy (see docs/home-infra-ai-context's own decisions.md entry on why this has to stay a classic PAT).",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 90
+    }
+  ]
+}
