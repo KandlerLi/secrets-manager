@@ -43,8 +43,9 @@ has only a `.md` file here (no directory); its `.md` names where its
   SMTP identity (a derived, not chosen, password) and the ntfy topic
   (**migrated**)
 - [home-infra/github-runner](home-infra/github-runner/README.md) —
-  the shared GitHub Actions runner PAT, read by the
-  `k3s-bootstrap-local` scripted identity (**migrated**)
+  the shared GitHub Actions runner's GitHub App credentials (switched
+  from a PAT 2026-09-16), read by the `k3s-bootstrap-local` scripted
+  identity (**migrated**)
 - [home-infra/blocky](home-infra/blocky/README.md) — Blocky's own
   Postgres password (**migrated**)
 - [dyndns/fritzbox](dyndns/fritzbox/README.md) — the FRITZ!Box

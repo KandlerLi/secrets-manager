@@ -34,9 +34,6 @@ command -v aws >/dev/null || fail "aws not found"
 command -v jq >/dev/null || fail "jq not found"
 [ -f "${schedule_file}" ] || fail "${schedule_file} not found"
 
-runbook_url="$(jq -r '.runbook_url' "${schedule_file}")"
-[ -n "${runbook_url}" ] && [ "${runbook_url}" != "null" ] || fail "${schedule_file} has no runbook_url"
-
 today_epoch="$(date -u +%s)"
 due_lines=()
 
@@ -45,8 +42,11 @@ for i in $(seq 0 $((count - 1))); do
   entry="$(jq -c ".secrets[${i}]" "${schedule_file}")"
   id="$(echo "${entry}" | jq -r '.id')"
   description="$(echo "${entry}" | jq -r '.description')"
+  runbook_url="$(echo "${entry}" | jq -r '.runbook_url')"
   last_rotated="$(echo "${entry}" | jq -r '.last_rotated')"
   interval="$(echo "${entry}" | jq -r '.rotate_every_days')"
+
+  [ -n "${runbook_url}" ] && [ "${runbook_url}" != "null" ] || fail "${id}: has no runbook_url"
 
   expiry_epoch="$(date -u -d "${last_rotated} +${interval} days" +%s)" \
     || fail "${id}: invalid last_rotated/rotate_every_days"
@@ -54,7 +54,8 @@ for i in $(seq 0 $((count - 1))); do
 
   echo "==> ${id}: ${days_left} day(s) until its recorded rotation deadline"
   if [ "${days_left}" -le "${warn_days}" ]; then
-    due_lines+=("- ${id} (${days_left}d left): ${description}")
+    due_lines+=("- ${id} (${days_left}d left): ${description}
+  Rotation procedure: ${runbook_url}")
   fi
 done
 
@@ -73,8 +74,8 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 tmp_message="$(mktemp)"
-body="$(printf 'The following aws/secrets-manager entries are within %s days of their recorded rotation deadline (rotation-schedule.json):\n\n%s\n\nRotation procedure for each (find the category letter named in its own line above): %s\n\nAfter rotating, update last_rotated in rotation-schedule.json in the same change.\n' \
-  "${warn_days}" "$(printf '%s\n' "${due_lines[@]}")" "${runbook_url}")"
+body="$(printf 'The following aws/secrets-manager entries are within %s days of their recorded rotation deadline (rotation-schedule.json):\n\n%s\n\nAfter rotating, update last_rotated in rotation-schedule.json in the same change.\n' \
+  "${warn_days}" "$(printf '%s\n\n' "${due_lines[@]}")")"
 
 jq -n --arg subject "Secret rotation reminder (${#due_lines[@]} due)" --arg body "${body}" \
   '{Subject: {Data: $subject}, Body: {Text: {Data: $body}}}' > "${tmp_message}"

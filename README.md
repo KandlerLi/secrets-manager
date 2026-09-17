@@ -247,10 +247,11 @@ has to stay a classic PAT); every other entry's interval is a
 self-imposed hygiene choice, not a hard deadline -- rotate the real
 credential first, then update `last_rotated` in the same change; the
 file only ever reflects what's already true, it never drives rotation
-itself. The reminder email includes `runbook_url` (the file's own
-top-level field, `docs/home-infra-docs`' own `rotate-secrets.md`) so
-whoever gets it can jump straight to the procedure -- linked
-whole-file rather than per-category anchors, since GitHub's own
-anchor-slugging for headings this punctuation-heavy is easy to get
-subtly wrong; each entry's own description names its category letter,
-enough to find the right section once the link is open.
+itself. Each entry carries its own `runbook_url` -- a direct link to
+its own `secrets/<group>/README.md`, not one shared file -- so the
+reminder email points straight at the exact rotation procedure for
+that credential. The three `authelia-oidc:*` pairs link the client's
+own README (Grafana/Open WebUI/Nextcloud), which already documents
+the coordinated two-secret procedure and cross-references the matching
+half in `secrets/home-infra/authelia/README.md`, so one link per entry
+is still enough even though those pairs span two secret groups.
