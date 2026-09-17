@@ -34,6 +34,9 @@ command -v aws >/dev/null || fail "aws not found"
 command -v jq >/dev/null || fail "jq not found"
 [ -f "${schedule_file}" ] || fail "${schedule_file} not found"
 
+runbook_url="$(jq -r '.runbook_url' "${schedule_file}")"
+[ -n "${runbook_url}" ] && [ "${runbook_url}" != "null" ] || fail "${schedule_file} has no runbook_url"
+
 today_epoch="$(date -u +%s)"
 due_lines=()
 
@@ -70,8 +73,8 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 tmp_message="$(mktemp)"
-body="$(printf 'The following aws/secrets-manager entries are within %s days of their recorded rotation deadline (rotation-schedule.json):\n\n%s\n\nRotate the real credential (see each one'"'"'s own README.md under secrets/), then update last_rotated in rotation-schedule.json.\n' \
-  "${warn_days}" "$(printf '%s\n' "${due_lines[@]}")")"
+body="$(printf 'The following aws/secrets-manager entries are within %s days of their recorded rotation deadline (rotation-schedule.json):\n\n%s\n\nRotation procedure for each (find the category letter named in its own line above): %s\n\nAfter rotating, update last_rotated in rotation-schedule.json in the same change.\n' \
+  "${warn_days}" "$(printf '%s\n' "${due_lines[@]}")" "${runbook_url}")"
 
 jq -n --arg subject "Secret rotation reminder (${#due_lines[@]} due)" --arg body "${body}" \
   '{Subject: {Data: $subject}, Body: {Text: {Data: $body}}}' > "${tmp_message}"
