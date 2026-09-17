@@ -1,11 +1,113 @@
 {
-  "_comment": "Manually-maintained rotation schedule for BACKLOG.md's own 'Manually-rotated Secrets Manager secrets have no rotation reminder' entry -- see README.md's own Rotation section. Only lists secrets with a genuine calendar-driven deadline (GitHub's own enforced PAT expiry, or a self-imposed hygiene interval worth tracking) -- not every secret in this repo belongs here. .github/workflows/check-secret-rotation.yml reads this daily and emails a reminder once a secret is within 7 days of last_rotated + rotate_every_days. Rotate the real credential first, then update last_rotated here to today's date in the same change -- this file only ever reflects what's already true, it doesn't drive rotation itself.",
+  "_comment": "Manually-maintained rotation schedule for BACKLOG.md's own 'Manually-rotated Secrets Manager secrets have no rotation reminder' entry -- see README.md's own Rotation section. .github/workflows/check-secret-rotation.yml reads this daily and emails a reminder once an entry is within 7 days of last_rotated + rotate_every_days. Rotate the real credential first, then update last_rotated here to today's date in the same change -- this file only ever reflects what's already true, it doesn't drive rotation itself. Tracked per real credential, not per Secrets Manager container -- a multi-key group like home-infra/authelia holds several unrelated keys with different real rotation history, so each gets its own entry (id: 'group:key'); a single-key group keeps a bare 'group' id. Category letters in each description cross-reference docs/home-infra-docs/docs/runbooks/rotate-secrets.md's own breakdown, which has the full rotation procedure for each. Deliberately excludes blocky_postgres_password (home-infra/blocky): it already has real automated rotation (infra/k3s-apps' rotate-blocky-postgres.yml, monthly) that writes the new value directly -- nothing updates last_rotated here when that runs, so tracking it in this manually-maintained file would just be a guaranteed eventual false alarm, not a real safety net. Every last_rotated below without a specific documented real rotation date is 2026-09-17, the day this list was built out to cover every remaining secret -- a tracking-start date, not a claim that the credential was actually rotated that day.",
   "secrets": [
     {
       "id": "k3s-apps/ghcr-pull-token",
-      "description": "GHCR pull token (classic PAT) shared by infra/k3s-apps' modules/home_agent and modules/sankey_export -- GitHub enforces a hard 90-day expiry on this token itself, not a self-imposed policy (see docs/home-infra-ai-context's own decisions.md entry on why this has to stay a classic PAT).",
+      "description": "Category A. GHCR pull token (classic PAT) shared by infra/k3s-apps' modules/home_agent and modules/sankey_export -- GitHub enforces a hard 90-day expiry on this token itself, not a self-imposed policy (see docs/home-infra-ai-context's own decisions.md entry on why this has to stay a classic PAT).",
       "last_rotated": "2026-09-17",
       "rotate_every_days": 90
+    },
+    {
+      "id": "dyndns/fritzbox",
+      "description": "HTTP Basic credentials the FRITZ!Box's own DynDNS client authenticates with. No platform-enforced expiry -- self-imposed hygiene interval.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 365
+    },
+    {
+      "id": "home-infra/authelia:authelia_session_secret",
+      "description": "Category B. Rotating logs out every active session immediately. No platform-enforced expiry, and deliberately not something to rotate casually -- a long, loose interval, not a real deadline.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 730
+    },
+    {
+      "id": "home-infra/authelia:authelia_storage_encryption_key",
+      "description": "Category B. Encrypts session/TOTP state in Authelia's own SQLite file -- rotating needs `authelia storage encryption change-key` against the live database, never a plain value swap. Same loose, non-urgent interval as the rest of this category.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 730
+    },
+    {
+      "id": "home-infra/authelia:authelia_reset_password_jwt_secret",
+      "description": "Category B. Lowest-stakes of this category -- only invalidates any password-reset email link currently in flight.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 730
+    },
+    {
+      "id": "home-infra/authelia:authelia_oidc_hmac_secret",
+      "description": "Category B. Rotating logs every live OIDC session out across Grafana, Open WebUI, and Nextcloud simultaneously.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 730
+    },
+    {
+      "id": "home-infra/authelia:authelia_oidc_issuer_private_key",
+      "description": "Category B. Same blast radius as authelia_oidc_hmac_secret -- logs every live OIDC session out across Grafana, Open WebUI, and Nextcloud simultaneously.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 730
+    },
+    {
+      "id": "home-infra/authelia:authelia_admin_password_hash",
+      "description": "Category D. Julian's own real Authelia login. Personal password hygiene, not a platform deadline.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 365
+    },
+    {
+      "id": "authelia-oidc:grafana",
+      "description": "Category C. The Grafana OIDC client secret pair -- Authelia's own hash half (home-infra/authelia's authelia_oidc_grafana_client_secret_hash) and Grafana's plaintext half (home-infra/grafana), always rotated together via infra/k3s-apps/scripts/rotate-oidc-client-secret.sh. Tracked as one entry since both halves change atomically.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 365
+    },
+    {
+      "id": "authelia-oidc:openwebui",
+      "description": "Category C. Same shape as authelia-oidc:grafana, for Open WebUI's own client secret pair (home-infra/authelia's hash half, home-infra/open-webui's plaintext half).",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 365
+    },
+    {
+      "id": "authelia-oidc:nextcloud",
+      "description": "Category C. Same shape as authelia-oidc:grafana, for Nextcloud's own client secret pair (home-infra/authelia's hash half, home-infra/nextcloud's plaintext half) -- the one pairing whose plaintext side applies through infra/home-infra's Ansible, not Terraform.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 365
+    },
+    {
+      "id": "home-infra/github-runner",
+      "description": "Category F (updated 2026-09-16 from a fine-grained PAT to GitHub App credentials -- app_id/app_private_key). No platform-enforced expiry on the App's own private key; self-imposed hygiene interval.",
+      "last_rotated": "2026-09-16",
+      "rotate_every_days": 365
+    },
+    {
+      "id": "home-infra/home-agent:home_agent_openai_api_key",
+      "description": "Category A. OpenAI API key for home_agent's own chat/completions calls. No platform-enforced expiry.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 180
+    },
+    {
+      "id": "home-infra/home-agent:nextcloud_tools_app_password",
+      "description": "Category E. Nextcloud app password for home_agent's own read-only Nextcloud integration (the dedicated home-agent bot account). Minting the replacement always needs occ on the homeserver.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 180
+    },
+    {
+      "id": "home-infra/ingress:k3s_ingress_acme_dns01_key",
+      "description": "Category A variant. The ACME DNS-01 Route53 IAM keypair -- itself Terraform-managed (aws_iam_access_key.acme_dns01 in aws/dyndns), rotate with terraform apply -replace, not a raw aws iam create-access-key.",
+      "last_rotated": "2026-09-11",
+      "rotate_every_days": 180
+    },
+    {
+      "id": "home-infra/monitoring:monitoring_ses_smtp_password",
+      "description": "Category G. Derived from a Terraform-managed SES IAM access key (aws/ses-relay), not chosen directly -- rotate the underlying key with terraform apply -replace, then re-derive.",
+      "last_rotated": "2026-09-11",
+      "rotate_every_days": 180
+    },
+    {
+      "id": "home-infra/monitoring:monitoring_ntfy_topic",
+      "description": "Category H. An unguessable identifier, not cryptographic material -- ntfy's own security model treats the topic name itself as the secret. Loose interval, informational only.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 730
+    },
+    {
+      "id": "k3s-apps/sankey-export:sankey_export_app_password",
+      "description": "Category E. sankey_export CronJob's own Nextcloud app password. infra/k3s-apps/scripts/rotate-sankey-export-app-password.sh handles everything after a fresh occ-minted token.",
+      "last_rotated": "2026-09-17",
+      "rotate_every_days": 180
     }
   ]
 }
