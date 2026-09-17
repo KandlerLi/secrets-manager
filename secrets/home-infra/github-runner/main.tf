@@ -14,7 +14,7 @@
 #trivy:ignore:AVD-AWS-0098
 resource "aws_secretsmanager_secret" "this" {
   name                    = "home-infra/github-runner"
-  description             = "Shared PAT for every repo's self-hosted GitHub Actions runner (bootstrap/k3s-bootstrap's own modules/github_runner)"
+  description             = "GitHub App credentials for every repo's self-hosted GitHub Actions runner (bootstrap/k3s-bootstrap's own modules/github_runner)"
   recovery_window_in_days = 7
 
   lifecycle {

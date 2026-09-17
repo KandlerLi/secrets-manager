@@ -226,3 +226,18 @@ and automated-rotation feasibility:
 `blocky_postgres_password` gets automated rotation (a scheduled GitHub
 Actions workflow that lives in `infra/k3s-apps`, since bootstrap repos have
 no runner); everything else is manual-by-design.
+
+`rotation-schedule.json` (this repo's own root) plus
+`.github/workflows/check-secret-rotation.yml` close BACKLOG.md's own
+"Manually-rotated Secrets Manager secrets have no rotation reminder" --
+a **reminder**, not automated rotation: a daily scheduled job emails
+`julian.kandler@outlook.com` once a listed secret is within 7 days of
+its recorded `last_rotated + rotate_every_days` deadline, via the
+already-verified `alerts@jkandler.de` SES identity
+(`aws/ses-relay`). Only lists secrets with a genuine calendar-driven
+deadline (right now: `k3s-apps/ghcr-pull-token`, whose classic PAT
+GitHub itself expires after 90 days -- see
+`docs/home-infra-ai-context`'s own `decisions.md` entry on why that
+has to stay a classic PAT) -- rotate the real credential first, then
+update `last_rotated` in the same change; the file only ever reflects
+what's already true, it never drives rotation itself.

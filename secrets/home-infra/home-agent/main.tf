@@ -14,7 +14,7 @@
 #trivy:ignore:AVD-AWS-0098
 resource "aws_secretsmanager_secret" "this" {
   name                    = "home-infra/home-agent"
-  description             = "home_agent's OpenAI/GHCR credentials and its nextcloud_tools sidecar's app password"
+  description             = "home_agent's OpenAI API key and its nextcloud_tools sidecar's app password (GHCR credentials split out to k3s-apps/ghcr-pull-token 2026-09-12)"
   recovery_window_in_days = 7
 
   lifecycle {
