@@ -5,7 +5,7 @@
       "id": "k3s-apps/ghcr-pull-token",
       "description": "Category A. GHCR pull token (classic PAT) shared by infra/k3s-apps' modules/home_agent and modules/sankey_export -- GitHub enforces a hard 90-day expiry on this token itself, not a self-imposed policy (see docs/home-infra-ai-context's own decisions.md entry on why this has to stay a classic PAT).",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/secrets/k3s-apps/ghcr-pull-token/README.md",
-      "last_rotated": "2025-09-17",
+      "last_rotated": "2026-09-17",
       "rotate_every_days": 90
     },
     {
