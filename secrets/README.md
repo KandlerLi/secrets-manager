@@ -34,8 +34,9 @@ has only a `.md` file here (no directory); its `.md` names where its
 - [home-infra/nextcloud](home-infra/nextcloud/README.md) — Nextcloud's
   OIDC client secret (Ansible-consumed, not Terraform) (**migrated**)
 - [home-infra/home-agent](home-infra/home-agent/README.md) —
-  home_agent's OpenAI API key and its nextcloud_tools app password
-  (**migrated**)
+  home_agent's Anthropic API key (chat), OpenAI API key (Whisper
+  speech-to-text only, since 2026-09-18), and its nextcloud_tools app
+  password (**migrated**)
 - [home-infra/ingress](home-infra/ingress/README.md) — the ACME
   DNS-01 IAM keypair (the dormant shared Basic Auth rollback
   credential was retired, not migrated) (**migrated**)
