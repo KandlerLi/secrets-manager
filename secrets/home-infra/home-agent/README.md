@@ -15,11 +15,21 @@ token, not tied to this one service). See that secret's own README.
 
 ## Keys
 
+### `home_agent_anthropic_api_key`
+Anthropic API key for `home_agent`'s own chat/tool-use calls
+(`agent.py`'s `AnthropicMessagesProvider`) — replaced
+`home_agent_openai_api_key` for this purpose 2026-09-18; Whisper
+speech-to-text stayed on OpenAI (see below), so both keys are live at
+once. Generate a new key in the Anthropic Console, `put-secret-value`,
+`terraform apply` (`infra/k3s-apps`), then revoke the old key once the
+new Deployment is confirmed healthy.
+
 ### `home_agent_openai_api_key`
-OpenAI API key for `home_agent`'s own chat/completions calls. Generate
-a new key in the OpenAI dashboard, `put-secret-value`, `terraform
-apply`, then revoke the old key once the new Deployment is confirmed
-healthy.
+OpenAI API key for `home_agent`'s Whisper speech-to-text relay only
+(`audio.py`) — no longer used for chat/completions as of 2026-09-18,
+see `home_agent_anthropic_api_key` above. Generate a new key in the
+OpenAI dashboard, `put-secret-value`, `terraform apply`, then revoke
+the old key once the new Deployment is confirmed healthy.
 
 ### `nextcloud_tools_app_password`
 Nextcloud app password for `home_agent`'s own read-only Nextcloud
