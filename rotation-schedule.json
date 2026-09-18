@@ -87,9 +87,16 @@
     },
     {
       "id": "home-infra/home-agent:home_agent_openai_api_key",
-      "description": "Category A. OpenAI API key for home_agent's own chat/completions calls. No platform-enforced expiry.",
+      "description": "Category A. OpenAI API key for home_agent's Whisper speech-to-text relay only (chat/completions moved to Anthropic 2026-09-18, see home_agent_anthropic_api_key). No platform-enforced expiry.",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/secrets/home-infra/home-agent/README.md",
       "last_rotated": "2026-09-17",
+      "rotate_every_days": 180
+    },
+    {
+      "id": "home-infra/home-agent:home_agent_anthropic_api_key",
+      "description": "Category A. Anthropic API key for home_agent's own chat/tool-use calls (replaced OpenAI 2026-09-18, see home_agent_openai_api_key). No platform-enforced expiry.",
+      "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/secrets/home-infra/home-agent/README.md",
+      "last_rotated": "2026-09-18",
       "rotate_every_days": 180
     },
     {
