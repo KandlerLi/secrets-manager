@@ -28,6 +28,10 @@ module "k3s_apps_sankey_export" {
   source = "./secrets/k3s-apps/sankey-export"
 }
 
+module "k3s_apps_bulwark" {
+  source = "./secrets/k3s-apps/bulwark"
+}
+
 module "home_infra_grafana" {
   source = "./secrets/home-infra/grafana"
 }
