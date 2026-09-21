@@ -32,6 +32,10 @@ module "k3s_apps_bulwark" {
   source = "./secrets/k3s-apps/bulwark"
 }
 
+module "k3s_apps_stalwart" {
+  source = "./secrets/k3s-apps/stalwart"
+}
+
 module "home_infra_grafana" {
   source = "./secrets/home-infra/grafana"
 }
