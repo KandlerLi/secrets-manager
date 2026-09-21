@@ -140,6 +140,13 @@
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/secrets/k3s-apps/bulwark/README.md",
       "last_rotated": "2026-09-20",
       "rotate_every_days": 365
+    },
+    {
+      "id": "k3s-apps/stalwart:stalwart_api_token",
+      "description": "Admin API key on Stalwart minted for Terraform (infra/k3s-apps' Stalwart provider). Full admin permissions; no platform-enforced expiry -- self-imposed hygiene interval. Rotate by minting a new key, seeding this secret, then destroying the old key.",
+      "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/secrets/k3s-apps/stalwart/README.md",
+      "last_rotated": "2026-09-21",
+      "rotate_every_days": 180
     }
   ]
 }
