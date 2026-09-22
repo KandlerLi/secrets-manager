@@ -1,9 +1,9 @@
 # Secret: `dyndns/fritzbox`
 
 **Terraform resource**:
-`module.dyndns_fritzbox.aws_secretsmanager_secret.this`, defined in
-`./main.tf` alongside this file (`aws/secrets-manager`, the
-per-secret module dir). Migrated here from `aws/dyndns` 2026-09-12 —
+`aws_secretsmanager_secret.this["dyndns/fritzbox"]`, defined in the root
+`main.tf` (`aws/secrets-manager`) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Migrated here from `aws/dyndns` 2026-09-12 —
 container only, no value. The only secret in this repo whose source
 root is a real CI/PR-gated repo rather than a bootstrap-category one;
 the "source relinquishes" half of the migration went through a normal

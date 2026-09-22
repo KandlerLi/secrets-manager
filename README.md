@@ -36,12 +36,30 @@ and rotation tooling without bloating `terraform-state`.
 
 ## Layout
 
-One self-contained module directory per secret, under
-`secrets/<owning-repo>/<service>/`: its `main.tf` (the
-`aws_secretsmanager_secret` resource + an `arn` output) and its
-`README.md` (keys, consumers, rotation). Root `main.tf` calls each with
-a `module` block. Until a secret has migrated it has only a `.md` file
-under `secrets/` (no directory).
+Every secret is one entry in the `local.secrets` map (name -> description)
+in the root `main.tf`, feeding a single `for_each aws_secretsmanager_secret.this`
+resource -- collapsed 2026-09-22 (ponytail-audit) from 14 near-identical
+one-resource module directories, each just this same resource wrapped
+in its own `main.tf`. Each secret's own `README.md` (keys, consumers,
+rotation) still lives at `secrets/<owning-repo>/<service>/README.md`,
+unchanged -- only the mechanical per-secret Terraform wrapper is gone.
+Until a secret exists it has only a `.md` file under `secrets/` (no
+directory).
+
+### Collapsing the per-secret modules (2026-09-22)
+
+Each of the 14 modules held exactly one `aws_secretsmanager_secret`
+resource, identical in shape (name/description/`recovery_window_in_days
+= 7`/`prevent_destroy`), differing only in the two string values --
+found via a ponytail-audit pass. Collapsed into the single `for_each`
+resource above with one `moved` block per secret
+(`module.<name>.aws_secretsmanager_secret.this` ->
+`aws_secretsmanager_secret.this["<key>"]`), a within-state address
+change with no API call and `prevent_destroy` untouched throughout --
+verified via a CI plan showing **0 to add, 0 to change, 0 to
+destroy**, only "moved" notices, before merging. Each `moved` block
+follows the same "safe to remove once no state predates it" rule as
+the older bare-resource -> module one already here.
 
 ## Backend
 
@@ -99,9 +117,25 @@ CI role's grant (`CreateSecret`/`DescribeSecret`, not `GetSecretValue`/
 here — same convention every other repo's CI permissions already
 follow.
 
+## Adding a genuinely new secret (not a migration)
+
+Add one entry to `local.secrets` in the root `main.tf` (name and
+description) — the `for_each` creates the container on the next
+apply, no `import` needed since nothing exists elsewhere for it. Add
+`secrets/<repo>/<service>/README.md` alongside every other secret's
+own doc. See `k3s-apps/bulwark`/`k3s-apps/stalwart` for real examples.
+
 ## Per-secret migration procedure (the no-destroy handoff)
 
-Follows the ADR 0006 / ADR 0010 pattern (the `aws-account-bootstrap` →
+**Historical** — this campaign (moving every secret out of
+`bootstrap/terraform-state`) finished 2026-09-12; see "Migration
+status" below. Kept as a faithful record of what was actually done,
+including its own now-superseded per-secret-module shape (collapsed
+into the single `for_each` resource in 2026-09-22's ponytail-audit
+pass — see "Layout" above) — not a template to follow for a future
+migration, which would need adapting to today's shape first.
+
+Followed the ADR 0006 / ADR 0010 pattern (the `aws-account-bootstrap` →
 `repo-infra` handoff; real `removed`-side example in `aws/dyndns` commit
 `d8d6541`). Per secret:
 
