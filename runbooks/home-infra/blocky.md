@@ -1,9 +1,9 @@
 # Secret: `home-infra/blocky`
 
 **Terraform resource**:
-`module.home_infra_blocky.aws_secretsmanager_secret.this`, defined in
-`./main.tf` alongside this file (`aws/secrets-manager`, the
-per-secret module dir). Migrated here from `bootstrap/terraform-state`
+`aws_secretsmanager_secret.this["home-infra/blocky"]`, defined in the root
+`main.tf` (`aws/secrets-manager`) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Migrated here from `bootstrap/terraform-state`
 2026-09-12 — container only, no value.
 
 **Consumed by**: `infra/k3s-apps`' `modules/blocky` (the Postgres

@@ -36,12 +36,29 @@ and rotation tooling without bloating `terraform-state`.
 
 ## Layout
 
-One self-contained module directory per secret, under
-`secrets/<owning-repo>/<service>/`: its `main.tf` (the
-`aws_secretsmanager_secret` resource + an `arn` output) and its
-`README.md` (keys, consumers, rotation). Root `main.tf` calls each with
-a `module` block. Until a secret has migrated it has only a `.md` file
-under `secrets/` (no directory).
+Every secret is one entry in the `local.secrets` map (name -> description)
+in the root `main.tf`, feeding a single `for_each aws_secretsmanager_secret.this`
+resource -- collapsed 2026-09-22 (ponytail-audit) from 14 near-identical
+one-resource module directories, each just this same resource wrapped
+in its own `main.tf`. Each secret's own doc (keys, consumers, rotation)
+lives at `runbooks/<owning-repo>/<service>.md` -- flattened the same
+day from `secrets/<owning-repo>/<service>/README.md`, once the
+directory held nothing but that one file.
+
+### Collapsing the per-secret modules (2026-09-22)
+
+Each of the 14 modules held exactly one `aws_secretsmanager_secret`
+resource, identical in shape (name/description/`recovery_window_in_days
+= 7`/`prevent_destroy`), differing only in the two string values --
+found via a ponytail-audit pass. Collapsed into the single `for_each`
+resource above with one `moved` block per secret
+(`module.<name>.aws_secretsmanager_secret.this` ->
+`aws_secretsmanager_secret.this["<key>"]`), a within-state address
+change with no API call and `prevent_destroy` untouched throughout --
+verified via a CI plan showing **0 to add, 0 to change, 0 to
+destroy**, only "moved" notices, before merging. Each `moved` block
+follows the same "safe to remove once no state predates it" rule as
+the older bare-resource -> module one already here.
 
 ## Backend
 
@@ -99,9 +116,25 @@ CI role's grant (`CreateSecret`/`DescribeSecret`, not `GetSecretValue`/
 here — same convention every other repo's CI permissions already
 follow.
 
+## Adding a genuinely new secret (not a migration)
+
+Add one entry to `local.secrets` in the root `main.tf` (name and
+description) — the `for_each` creates the container on the next
+apply, no `import` needed since nothing exists elsewhere for it. Add
+`runbooks/<repo>/<service>.md` alongside every other secret's own
+doc. See `k3s-apps/bulwark`/`k3s-apps/stalwart` for real examples.
+
 ## Per-secret migration procedure (the no-destroy handoff)
 
-Follows the ADR 0006 / ADR 0010 pattern (the `aws-account-bootstrap` →
+**Historical** — this campaign (moving every secret out of
+`bootstrap/terraform-state`) finished 2026-09-12; see "Migration
+status" below. Kept as a faithful record of what was actually done,
+including its own now-superseded per-secret-module shape (collapsed
+into the single `for_each` resource in 2026-09-22's ponytail-audit
+pass — see "Layout" above) — not a template to follow for a future
+migration, which would need adapting to today's shape first.
+
+Followed the ADR 0006 / ADR 0010 pattern (the `aws-account-bootstrap` →
 `repo-infra` handoff; real `removed`-side example in `aws/dyndns` commit
 `d8d6541`). Per secret:
 
@@ -168,7 +201,7 @@ Terraform drops the resource from state with no delete API call. Never write
 
 `k3s-apps/ghcr-pull-token` isn't in this table — it's a genuinely new
 secret, not a migration (split out of `home-infra/home-agent`
-2026-09-12; see `secrets/k3s-apps/ghcr-pull-token/README.md`).
+2026-09-12; see `runbooks/k3s-apps/ghcr-pull-token.md`).
 
 `dyndns/fritzbox` didn't come from `bootstrap/terraform-state/
 secrets_manager.tf` at all — it was created directly in `aws/dyndns`
@@ -220,7 +253,7 @@ anything more sensitive than they do today).
 
 ## Rotation
 
-Per-secret rotation procedures: `secrets/`. Cross-cutting rotation categories
+Per-secret rotation procedures: `runbooks/`. Cross-cutting rotation categories
 and automated-rotation feasibility:
 `docs/home-infra-docs/docs/runbooks/rotate-secrets.md`. Only
 `blocky_postgres_password` gets automated rotation (a scheduled GitHub
@@ -248,12 +281,12 @@ self-imposed hygiene choice, not a hard deadline -- rotate the real
 credential first, then update `last_rotated` in the same change; the
 file only ever reflects what's already true, it never drives rotation
 itself. Each entry carries its own `runbook_url` -- a direct link to
-its own `secrets/<group>/README.md`, not one shared file -- so the
+its own `runbooks/<group>.md`, not one shared file -- so the
 reminder email points straight at the exact rotation procedure for
 that credential. The three `authelia-oidc:*` pairs link the client's
 own README (Grafana/Open WebUI/Nextcloud), which already documents
 the coordinated two-secret procedure and cross-references the matching
-half in `secrets/home-infra/authelia/README.md`, so one link per entry
+half in `runbooks/home-infra/authelia.md`, so one link per entry
 is still enough even though those pairs span two secret groups.
 
 `rotation-schedule.md` is a generated, human-readable rendering of
@@ -264,7 +297,7 @@ built-in column sort to fall back on. Generated by
 `scripts/manage-rotation-schedule.sh`, which also doubles as the
 day-to-day tool for recording a real rotation: run it with no
 arguments after actually rotating a credential (see its own
-`runbook_url`/`secrets/<group>/README.md` for the procedure) and it
+`runbook_url`/`runbooks/<group>.md` for the procedure) and it
 lists every secret, asks which one you just rotated, sets its
 `last_rotated` to today in `rotation-schedule.json`, and regenerates
 `rotation-schedule.md` to match. Run with `--render-only` to

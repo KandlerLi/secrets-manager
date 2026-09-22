@@ -1,9 +1,9 @@
 # Secret: `k3s-apps/sankey-export`
 
 **Terraform resource**:
-`module.k3s_apps_sankey_export.aws_secretsmanager_secret.this`, defined
-in `./main.tf` alongside this file (`aws/secrets-manager`, the
-per-secret module dir). Migrated here from `bootstrap/terraform-state`
+`aws_secretsmanager_secret.this["k3s-apps/sankey-export"]`, defined in the root
+`main.tf` (`aws/secrets-manager`) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Migrated here from `bootstrap/terraform-state`
 2026-09-10, the pilot for the campaign in that repo's own README —
 container only, no value.
 

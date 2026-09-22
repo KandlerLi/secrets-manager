@@ -1,9 +1,9 @@
 # Secret: `k3s-apps/ghcr-pull-token`
 
 **Terraform resource**:
-`module.k3s_apps_ghcr_pull_token.aws_secretsmanager_secret.this`,
-defined in `./main.tf` alongside this file (`aws/secrets-manager`,
-the per-secret module dir). Created 2026-09-12 — container only, no
+`aws_secretsmanager_secret.this["k3s-apps/ghcr-pull-token"]`, defined in the root
+`main.tf` (`aws/secrets-manager`) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Created 2026-09-12 — container only, no
 value. **Not a migration**: this key was split out of
 `home-infra/home-agent`'s own group the same day, the first time this
 campaign has restructured an already-migrated secret's contents rather

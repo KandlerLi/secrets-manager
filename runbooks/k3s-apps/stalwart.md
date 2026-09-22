@@ -1,8 +1,9 @@
 # Secret: `k3s-apps/stalwart`
 
 **Terraform resource**:
-`module.k3s_apps_stalwart.aws_secretsmanager_secret.this`, defined in
-`./main.tf` alongside this file. A genuinely new secret, not a
+`aws_secretsmanager_secret.this["k3s-apps/stalwart"]`, defined in the root
+`main.tf` (`aws/secrets-manager`) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. A genuinely new secret, not a
 migration.
 
 **Consumed by**: `infra/k3s-apps`' Stalwart Terraform provider

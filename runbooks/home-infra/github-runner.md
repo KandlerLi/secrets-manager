@@ -1,9 +1,9 @@
 # Secret: `home-infra/github-runner`
 
 **Terraform resource**:
-`module.home_infra_github_runner.aws_secretsmanager_secret.this`,
-defined in `./main.tf` alongside this file (`aws/secrets-manager`,
-the per-secret module dir). Migrated here from
+`aws_secretsmanager_secret.this["home-infra/github-runner"]`, defined in the root
+`main.tf` (`aws/secrets-manager`) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Migrated here from
 `bootstrap/terraform-state` 2026-09-12 — container only, no value.
 
 **Consumed by**: `bootstrap/k3s-bootstrap`'s `modules/github_runner`,
