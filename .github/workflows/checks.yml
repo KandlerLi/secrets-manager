@@ -6,7 +6,7 @@ on:
 
 jobs:
   terraform:
-    uses: KandlerLi/gha-common/.github/workflows/terraform-checks.yml@v0.0.13
+    uses: KandlerLi/gha-common/.github/workflows/terraform-checks.yml@v0.0.14
     with:
       aws_region: eu-central-1
     secrets: inherit
@@ -20,3 +20,5 @@ jobs:
       # but is only allowed 'packages: read'" otherwise (found live
       # against aws-budget, 2026-09-03).
       packages: write
+      # plan's own "Post plan to pull request" comment step needs this.
+      pull-requests: write
