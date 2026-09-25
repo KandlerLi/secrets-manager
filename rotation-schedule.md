@@ -3,7 +3,7 @@
 
 # Secret rotation schedule
 
-Generated 2026-09-22. Sorted soonest-due first -- compare "Next due" against today's own date to see what's overdue; this file has no schedule of its own, so a relative day-count here would go stale the moment time passes without a re-run (check-secret-rotation.yml is what actually watches this daily). Machine-readable source: [rotation-schedule.json](rotation-schedule.json). Full mechanism: [README.md](README.md)'s own Rotation section.
+Generated 2026-09-25. Sorted soonest-due first -- compare "Next due" against today's own date to see what's overdue; this file has no schedule of its own, so a relative day-count here would go stale the moment time passes without a re-run (check-secret-rotation.yml is what actually watches this daily). Machine-readable source: [rotation-schedule.json](rotation-schedule.json). Full mechanism: [README.md](README.md)'s own Rotation section.
 
 | Next due | Secret | Last rotated | Description | Runbook |
 |---|---|---|---|---|
@@ -22,6 +22,7 @@ Generated 2026-09-22. Sorted soonest-due first -- compare "Next due" against tod
 | 2027-09-17 | `dyndns/fritzbox` | 2026-09-17 | HTTP Basic credentials the FRITZ!Box's own DynDNS client authenticates with. No platform-enforced expiry -- self-imposed hygiene interval. | [link](https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/dyndns/fritzbox.md) |
 | 2027-09-17 | `home-infra/authelia:authelia_admin_password_hash` | 2026-09-17 | Category D. Julian's own real Authelia login. Personal password hygiene, not a platform deadline. | [link](https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/authelia.md) |
 | 2027-09-20 | `authelia-oidc:bulwark` | 2026-09-20 | Category C. Same shape as authelia-oidc:grafana, for Bulwark webmail's own client secret pair (home-infra/authelia's hash half, k3s-apps/bulwark's plaintext half). | [link](https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/k3s-apps/bulwark.md) |
+| 2027-09-25 | `authelia-oidc:paperless` | 2026-09-25 | Category C. Same shape as authelia-oidc:grafana, for Paperless-ngx's own client secret pair (home-infra/authelia's hash half, k3s-apps/paperless's plaintext half). | [link](https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/k3s-apps/paperless.md) |
 | 2028-09-16 | `home-infra/authelia:authelia_oidc_hmac_secret` | 2026-09-17 | Category B. Rotating logs every live OIDC session out across Grafana, Open WebUI, and Nextcloud simultaneously. | [link](https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/authelia.md) |
 | 2028-09-16 | `home-infra/authelia:authelia_oidc_issuer_private_key` | 2026-09-17 | Category B. Same blast radius as authelia_oidc_hmac_secret -- logs every live OIDC session out across Grafana, Open WebUI, and Nextcloud simultaneously. | [link](https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/authelia.md) |
 | 2028-09-16 | `home-infra/authelia:authelia_reset_password_jwt_secret` | 2026-09-17 | Category B. Lowest-stakes of this category -- only invalidates any password-reset email link currently in flight. | [link](https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/authelia.md) |

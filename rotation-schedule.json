@@ -142,6 +142,13 @@
       "rotate_every_days": 365
     },
     {
+      "id": "authelia-oidc:paperless",
+      "description": "Category C. Same shape as authelia-oidc:grafana, for Paperless-ngx's own client secret pair (home-infra/authelia's hash half, k3s-apps/paperless's plaintext half).",
+      "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/k3s-apps/paperless.md",
+      "last_rotated": "2026-09-25",
+      "rotate_every_days": 365
+    },
+    {
       "id": "k3s-apps/stalwart:stalwart_api_token",
       "description": "Admin API key on Stalwart minted for Terraform (infra/k3s-apps' Stalwart provider). Full admin permissions; no platform-enforced expiry -- self-imposed hygiene interval. Rotate by minting a new key, seeding this secret, then destroying the old key.",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/k3s-apps/stalwart.md",
