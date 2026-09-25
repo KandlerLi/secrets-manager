@@ -26,6 +26,8 @@ not migrations.
   (created, not migrated)
 - [k3s-apps/bulwark](k3s-apps/bulwark.md) — Bulwark webmail's own
   Authelia OIDC client secret (created, not migrated)
+- [k3s-apps/paperless](k3s-apps/paperless.md) — Paperless-ngx's own
+  Authelia OIDC client secret (created, not migrated)
 - [k3s-apps/stalwart](k3s-apps/stalwart.md) — the Stalwart
   management-API token `infra/k3s-apps`' Terraform provider
   authenticates with (created, not migrated)
