@@ -34,27 +34,35 @@ This container starts empty, and `home-infra/authelia` has no
 `rotate-oidc-client-secret.sh` (which refuses to add a missing key)
 can't do the first write. Generate the pair, then seed both halves by
 hand. Values are read from silent prompts and passed as `file://` from
-a private temp file, never as a command-line argument:
+a private temp file, never as a command-line argument. Works in bash
+and zsh (zsh's `read -p` means something else), and writes nothing
+unless the plaintext is non-empty and the hash looks like a pbkdf2
+hash:
 
 ```bash
 docker run --rm authelia/authelia:4.39.22 \
   authelia crypto hash generate pbkdf2 --variant sha512 \
   --random --random.length 64 --random.charset alphanumeric
 
-read -rsp "plaintext: " PLAIN; echo; read -rsp "hash: " HASH; echo
-umask 077; T=$(mktemp)
+printf 'plaintext: '; read -rs PLAIN; echo
+printf 'hash: '; read -rs HASH; echo
 
-jq -n --arg v "$PLAIN" '{authelia_oidc_paperless_client_secret: $v}' > "$T"
-aws secretsmanager put-secret-value --region eu-central-1 \
-  --secret-id k3s-apps/paperless --secret-string "file://$T"
-
-aws secretsmanager get-secret-value --region eu-central-1 \
-  --secret-id home-infra/authelia --query SecretString --output text \
-  | jq --arg v "$HASH" '.authelia_oidc_paperless_client_secret_hash = $v' > "$T"
-aws secretsmanager put-secret-value --region eu-central-1 \
-  --secret-id home-infra/authelia --secret-string "file://$T"
-
-rm -f "$T"; unset PLAIN HASH
+if [ -n "$PLAIN" ] && [ "${PLAIN#\$}" = "$PLAIN" ] && [ "${HASH#\$pbkdf2}" != "$HASH" ]; then
+  umask 077; T=$(mktemp)
+  jq -n --arg v "$PLAIN" '{authelia_oidc_paperless_client_secret: $v}' > "$T" &&
+  aws secretsmanager put-secret-value --region eu-central-1 \
+    --secret-id k3s-apps/paperless --secret-string "file://$T" &&
+  aws secretsmanager get-secret-value --region eu-central-1 \
+    --secret-id home-infra/authelia --query SecretString --output text \
+    | jq --arg v "$HASH" '.authelia_oidc_paperless_client_secret_hash = $v' > "$T" &&
+  [ -s "$T" ] &&
+  aws secretsmanager put-secret-value --region eu-central-1 \
+    --secret-id home-infra/authelia --secret-string "file://$T"
+  rm -f "$T"
+else
+  echo "empty or swapped input -- nothing written"
+fi
+unset PLAIN HASH
 ```
 
 The second write merges one key into Authelia's existing JSON; it never
