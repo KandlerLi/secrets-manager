@@ -15,7 +15,7 @@ deliberately **not** here: nobody ever types either, so they are
 ## Keys
 
 ### `authelia_oidc_paperless_client_secret`
-The only key in this group. Plaintext half of Paperless-ngx's OIDC
+Plaintext half of Paperless-ngx's OIDC
 client secret pair -- Authelia holds the matching hash
 (`home-infra/authelia`'s `authelia_oidc_paperless_client_secret_hash`).
 Never rotate this alone.
@@ -26,6 +26,48 @@ Never rotate this alone.
 writes both secrets and runs `terraform apply`. Verify for real
 afterward: sign out, "Sign in with Authelia" must land back in Paperless
 authenticated.
+
+### `outlook_oauth_client_id`, `outlook_oauth_client_secret`
+Paperless's Outlook mail OAuth2 client (ADR 0023, update 2026-09-27),
+from a Microsoft app registration that lives outside Terraform:
+
+1. https://entra.microsoft.com (or portal.azure.com) → App
+   registrations → New registration. Name `Paperless jkandler.de`,
+   supported account types "Personal Microsoft accounts only", redirect
+   URI platform **Web**, `https://docs.jkandler.de/api/oauth/callback/`.
+2. Overview → copy the Application (client) ID.
+3. Certificates & secrets → New client secret (24 months). Copy the
+   **Value** (not the Secret ID); it is shown only once.
+4. No API permissions need adding: Paperless requests
+   `offline_access` and `https://outlook.office.com/IMAP.AccessAsUser.All`
+   at login and Julian consents then.
+
+Seed both into the existing JSON (merge, never replace):
+
+```bash
+printf 'client id: '; read -rs CID; echo
+printf 'client secret value: '; read -rs CSEC; echo
+if [ -n "$CID" ] && [ -n "$CSEC" ]; then
+  umask 077; T=$(mktemp)
+  aws secretsmanager get-secret-value --region eu-central-1 \
+    --secret-id k3s-apps/paperless --query SecretString --output text \
+    | jq --arg i "$CID" --arg s "$CSEC" \
+      '.outlook_oauth_client_id = $i | .outlook_oauth_client_secret = $s' > "$T" &&
+  [ -s "$T" ] &&
+  aws secretsmanager put-secret-value --region eu-central-1 \
+    --secret-id k3s-apps/paperless --secret-string "file://$T"
+  rm -f "$T"
+else
+  echo "empty input -- nothing written"
+fi
+unset CID CSEC
+```
+
+**Rotation**: Microsoft enforces the secret's expiry. Before it lapses,
+add a new client secret in the same app registration, seed it the same
+way, apply `infra/k3s-apps`, then delete the old secret in the portal.
+The connected mail account's refresh token is separate and survives a
+client secret rotation.
 
 ## Bootstrapping the first value
 
