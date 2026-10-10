@@ -275,7 +275,7 @@ holds several keys with unrelated rotation history) except
 manually-maintained file would never stay in sync with. Only
 `k3s-apps/ghcr-pull-token` has a real platform-enforced deadline
 (GitHub's own 90-day classic-PAT expiry -- see
-`docs/home-infra-ai-context`'s own `decisions.md` entry on why that
+`docs/home-infra-docs`' own `decisions.md` entry on why that
 has to stay a classic PAT); every other entry's interval is a
 self-imposed hygiene choice, not a hard deadline -- rotate the real
 credential first, then update `last_rotated` in the same change; the
