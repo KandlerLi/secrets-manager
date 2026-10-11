@@ -1,26 +1,5 @@
 #!/usr/bin/env bash
-# Interactive helper for rotation-schedule.json (this repo's own root
-# -- see its own "_comment" and README.md's Rotation section). GitHub
-# renders .json files as syntax-highlighted code, never as Markdown,
-# and plain GFM tables have no built-in column sort -- so this bakes
-# the "soonest to expire first" order in at generation time instead,
-# into a real Markdown table (rotation-schedule.md) that's pleasant to
-# browse on GitHub.
-#
-# Usage:
-#   ./scripts/manage-rotation-schedule.sh
-#       Interactive: lists every secret, asks which one was just
-#       rotated, sets its last_rotated to today in rotation-schedule.json,
-#       then regenerates rotation-schedule.md.
-#
-#   ./scripts/manage-rotation-schedule.sh --render-only
-#       Regenerates rotation-schedule.md only -- no prompt, no date
-#       changes. Useful after editing rotation-schedule.json by hand
-#       (e.g. adding a new secret) without rotating anything.
-#
-# Never touches the real credential or AWS -- this only edits the
-# tracking file and its own rendered view. Rotate the real secret
-# first (see the runbook_url this same file points at), then run this.
+# Usage: ./scripts/manage-rotation-schedule.sh [--render-only]; see README, "Rotation".
 
 set -euo pipefail
 
@@ -86,17 +65,11 @@ for i in $(seq 0 $((count - 1))); do
   last_rotated="$(echo "${entry}" | jq -r '.last_rotated')"
   interval="$(echo "${entry}" | jq -r '.rotate_every_days')"
 
-  # next_due is an absolute date -- unlike a "days left" count, it stays
-  # equally meaningful whether this file was regenerated today or months
-  # ago (this script has no schedule of its own; check-secret-rotation.yml
-  # is what actually watches this daily). Sorted on directly below, not a
-  # separately-computed days-left number: it's already YYYY-MM-DD, so a
-  # plain lexicographic sort is already a correct chronological one.
+  # Absolute YYYY-MM-DD date, so a plain string sort is chronological.
   next_due="$(date -u -d "${last_rotated} +${interval} days" +%F)" \
     || fail "${id}: invalid last_rotated/rotate_every_days"
 
-  # Escape the one character that would actually break a table cell --
-  # a literal "|" -- everything else (backticks, parens) is fine as-is.
+  # "|" is the only character that breaks a table cell.
   description="${description//|/\\|}"
 
   printf '%s\t%s\t%s\t%s\t%s\n' \

@@ -9,9 +9,7 @@ on:
 permissions:
   contents: read
   id-token: write
-  # See checks.yml's own identical comment: a caller's permissions cap
-  # every nested job inside the reusable workflow, and build-image
-  # needs write to push to GHCR.
+  # The reusable workflow's build-image job pushes to GHCR.
   packages: write
 
 concurrency:

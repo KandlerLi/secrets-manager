@@ -95,20 +95,17 @@ own permissions at all.
 `julian`'s `GetSecretValue`/`DescribeSecret`/`PutSecretValue` grant on
 every container is a statement in
 [`terraform-state/operator.tf`](https://github.com/KandlerLi/terraform-state/blob/main/operator.tf)'s `terraform-operator` policy,
-next to the rest of `julian`'s operator permissions — it does **not**
-move here as containers migrate. Containers still defined in
-`terraform-state`'s own `secrets_manager.tf` are covered there by real
-resource references; ones migrated here are covered by a wildcard ARN
-string (`...:secret:<name>-*`). When `home-infra/github-runner` migrates,
-`k3s_bootstrap_local.tf`'s own `ReadGithubRunnerSecret` statement
-similarly switches from a resource reference to a wildcard string,
-staying in `terraform-state`.
+next to the rest of `julian`'s operator permissions — it did **not**
+move here with the containers. Every container is covered there by a
+wildcard ARN string (`...:secret:<name>-*`), and so is
+`k3s_bootstrap_local.tf`'s `ReadGithubRunnerSecret` statement for
+`home-infra/github-runner`.
 
 Consumers ([`k3s-apps/secrets.tf`](https://github.com/KandlerLi/k3s-apps/blob/main/secrets.tf), [`k3s-bootstrap/secrets.tf`](https://github.com/KandlerLi/k3s-bootstrap/blob/main/secrets.tf),
-[`home-infra`](https://github.com/KandlerLi/home-infra)'s Ansible + `sync_secrets_to_pass.py`) and the
+[`home-infra`](https://github.com/KandlerLi/home-infra)'s Ansible) and the
 [`repo-infra/aws_policies.tf`](https://github.com/KandlerLi/repo-infra/blob/main/aws_policies.tf) CI grants all reference secrets **by
 name / ARN-pattern string**, never by Terraform resource reference — they
-need **zero changes** as secrets migrate here.
+needed **zero changes** when secrets migrated here.
 
 A third location, distinct from both of the above: **this repo's own**
 CI role's grant (`CreateSecret`/`DescribeSecret`, not `GetSecretValue`/
@@ -288,6 +285,12 @@ own README (Grafana/Open WebUI/Nextcloud), which already documents
 the coordinated two-secret procedure and cross-references the matching
 half in `runbooks/home-infra/authelia.md`, so one link per entry
 is still enough even though those pairs span two secret groups.
+
+`scripts/check-secret-rotation.sh` does the check and sends the mail. It
+needs an AWS session with `ses:SendEmail` on the `jkandler.de` identity
+and `jq` on PATH; the workflow provides both (its OIDC role, and an
+`apt-get install` of exactly what this one job needs). It never rotates
+anything itself.
 
 `rotation-schedule.md` is a generated, human-readable rendering of
 `rotation-schedule.json` for browsing on GitHub -- a Markdown table,
