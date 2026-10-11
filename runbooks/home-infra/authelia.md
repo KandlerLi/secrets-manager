@@ -2,17 +2,17 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["home-infra/authelia"]`, defined in the root
-`main.tf` (`aws/secrets-manager`) alongside every other secret's own
-container -- a single `for_each` resource, not a per-secret module. Migrated here from `bootstrap/terraform-state`
+`main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-12 — the last group in the campaign — container only, no
 value; the value is set out-of-band via `aws secretsmanager
 put-secret-value` (never `aws_secretsmanager_secret_version` in
 Terraform).
 
-**Consumed by**: `infra/k3s-apps`' `modules/authelia`, read via
+**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/authelia`, read via
 `secrets.tf`'s `data "aws_secretsmanager_secret_version"` +
 `jsondecode()` at every `terraform plan`/`apply` (both the apply and
-plan CI roles need `GetSecretValue` for this, unlike `aws/dyndns`'s own
+plan CI roles need `GetSecretValue` for this, unlike [`dyndns`](https://github.com/KandlerLi/dyndns)'s own
 metadata-only plan role — `jsondecode()` needs the real value to
 compute a diff).
 
@@ -27,7 +27,7 @@ Encryption key for Authelia's session cookies (config's
 `session.secret`) — pure random noise. Generate with `authelia crypto
 rand --length 64 --charset alphanumeric` (the CLI ships in Authelia's
 own image, `ghcr.io/authelia/authelia:4.39.22` per
-`infra/k3s-apps/modules/authelia/main.tf`'s pinned digest).
+[`k3s-apps/modules/authelia/main.tf`](https://github.com/KandlerLi/k3s-apps/blob/main/modules/authelia/main.tf)'s pinned digest).
 **Rotation impact**: logs out every active session immediately
 (everyone re-authenticates, MFA included). Otherwise safe to rotate
 any time.
@@ -89,18 +89,18 @@ docker run --rm authelia/authelia:4.39.22 \
 This prints both the random plaintext and its pbkdf2 hash — keep both,
 they go to two different secrets.
 
-Feed both values to `infra/k3s-apps/scripts/rotate-oidc-client-secret.sh
+Feed both values to `[`k3s-apps/scripts/rotate-oidc-client-secret.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-oidc-client-secret.sh)
 grafana` (or `openwebui`, or `nextcloud`) — it writes both secrets and
 rejects an obviously-swapped pair (a pbkdf2 hash always starts with
 `$`, the random plaintext never does).
 
 **Grafana/Open WebUI**: the script then runs `terraform apply` (rolls
 Authelia and the client Deployment together, in sync) and stops there
-— both live in `infra/k3s-apps`.
+— both live in [`k3s-apps`](https://github.com/KandlerLi/k3s-apps).
 
 **Nextcloud** (script support added 2026-09-11 — it used to be
 manual): the script runs the same `terraform apply` for Authelia's own
-side, then also re-runs `infra/home-infra`'s `site.yml`
+side, then also re-runs [`home-infra`](https://github.com/KandlerLi/home-infra)'s `site.yml`
 (`--ask-become-pass`, so you run this one yourself) so the new
 plaintext reaches Nextcloud's own `occ user_oidc:provider` config —
 confirmed live that step is a real upsert, not a formality (unlike
@@ -116,5 +116,5 @@ crypto material (unattended rotation is actively harmful given the
 logout/re-auth blast radius on session or OIDC-signing material, not
 merely unnecessary) or the coordinated OIDC pairs (need a redeploy of
 the *other* secret's consumer too, in lockstep). See
-`home-infra-docs/docs/runbooks/rotate-secrets.md`'s own "reality
+[`home-infra-docs/docs/runbooks/rotate-secrets.md`](https://github.com/KandlerLi/home-infra-docs/blob/main/docs/runbooks/rotate-secrets.md)'s own "reality
 check" section for the fuller reasoning.

@@ -4,7 +4,7 @@ One file per `aws_secretsmanager_secret` container, path mirroring the
 secret's own name (`home-infra/authelia` -> `home-infra/authelia.md`),
 covering what its keys are, who consumes them, and exactly how to
 rotate each one. See
-`home-infra-docs/docs/runbooks/rotate-secrets.md` for the
+[`home-infra-docs/docs/runbooks/rotate-secrets.md`](https://github.com/KandlerLi/home-infra-docs/blob/main/docs/runbooks/rotate-secrets.md) for the
 cross-cutting rotation categories and automated-rotation feasibility
 these draw from. The actual Terraform (a single `for_each
 aws_secretsmanager_secret.this` resource, one entry per secret in
@@ -13,7 +13,7 @@ aws_secretsmanager_secret.this` resource, one entry per secret in
 module directories the way they once were.
 
 Most of these were migrated in one group at a time out of
-`bootstrap/terraform-state/secrets_manager.tf` (see this repo's own
+[`terraform-state/secrets_manager.tf`](https://github.com/KandlerLi/terraform-state/blob/main/secrets_manager.tf) (see this repo's own
 `README.md` for the historical migration-status table and
 `removed`/`import` handoff procedure); a few are genuinely new secrets,
 not migrations.
@@ -29,7 +29,7 @@ not migrations.
 - [k3s-apps/paperless](k3s-apps/paperless.md) — Paperless-ngx's own
   Authelia OIDC client secret (created, not migrated)
 - [k3s-apps/stalwart](k3s-apps/stalwart.md) — the Stalwart
-  management-API token `infra/k3s-apps`' Terraform provider
+  management-API token [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' Terraform provider
   authenticates with (created, not migrated)
 - [home-infra/grafana](home-infra/grafana.md) — Grafana's Authelia
   OIDC client secret (its dead admin password was removed in the same
@@ -56,7 +56,7 @@ not migrations.
   password
 - [dyndns/fritzbox](dyndns/fritzbox.md) — the FRITZ!Box router's own
   HTTP Basic Auth credentials, the only secret here whose source root
-  is `aws/dyndns` rather than `bootstrap/terraform-state`
+  is [`dyndns`](https://github.com/KandlerLi/dyndns) rather than [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 
 Every container has `lifecycle { prevent_destroy = true }` — these are
 foundational, load-bearing resources for every service migrated off

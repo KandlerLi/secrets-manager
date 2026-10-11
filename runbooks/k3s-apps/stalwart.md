@@ -2,11 +2,11 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["k3s-apps/stalwart"]`, defined in the root
-`main.tf` (`aws/secrets-manager`) alongside every other secret's own
+`main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)) alongside every other secret's own
 container -- a single `for_each` resource, not a per-secret module. A genuinely new secret, not a
 migration.
 
-**Consumed by**: `infra/k3s-apps`' Stalwart Terraform provider
+**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' Stalwart Terraform provider
 (`secrets.tf` -> `local.k3s_apps_stalwart`), which manages Stalwart's
 settings as code.
 
@@ -16,7 +16,7 @@ settings as code.
 An **API key on Stalwart's `admin` account**, created just for
 Terraform (one of the account's max 5 keys). It authenticates as a
 Bearer token against the management API (`POST /jmap/`, see
-`home-infra-docs/docs/runbooks/stalwart-mail-server.md`). It works
+[`home-infra-docs/docs/runbooks/stalwart-mail-server.md`](https://github.com/KandlerLi/home-infra-docs/blob/main/docs/runbooks/stalwart-mail-server.md)). It works
 regardless of the server's Authentication Directory setting, which is
 the whole reason it's the right credential here.
 

@@ -2,14 +2,14 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["k3s-apps/ghcr-pull-token"]`, defined in the root
-`main.tf` (`aws/secrets-manager`) alongside every other secret's own
+`main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)) alongside every other secret's own
 container -- a single `for_each` resource, not a per-secret module. Created 2026-09-12 — container only, no
 value. **Not a migration**: this key was split out of
 `home-infra/home-agent`'s own group the same day, the first time this
 campaign has restructured an already-migrated secret's contents rather
 than just moving an existing container between Terraform roots.
 
-**Consumed by**: `infra/k3s-apps`' `modules/home_agent` and
+**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/home_agent` and
 `modules/sankey_export`, both via `secrets.tf` — genuinely two
 independent consumers of the exact same credential, not a shared
 container for convenience. Splitting it out made that explicit in the
@@ -30,7 +30,7 @@ GitHub account.
 
 **Rotation**: generate a new fine-grained PAT in GitHub's own PAT
 settings with the same `read:packages` scope, `put-secret-value`, then
-`terraform apply` in `infra/k3s-apps` — one apply rolls both
+`terraform apply` in [`k3s-apps`](https://github.com/KandlerLi/k3s-apps) — one apply rolls both
 `home_agent`'s and `sankey_export`'s Deployments together, since both
 read this exact value. Verify for real before considering it done: a
 clean apply only proves the Kubernetes Secret objects updated, not

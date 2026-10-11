@@ -8,11 +8,11 @@
 # (that workflow's own OIDC role assumption covers this) and jq on
 # PATH (installed by the calling workflow -- not baked into the runner
 # image itself, same "install exactly what this one workflow needs"
-# precedent infra/k3s-apps' own rotate-blocky-postgres-password.sh
+# precedent KandlerLi/k3s-apps' own rotate-blocky-postgres-password.sh
 # already uses for psql).
 #
 # Never rotates anything itself -- this is a reminder, not automated
-# rotation (see home-infra-docs/docs/runbooks/rotate-secrets.md's
+# rotation (see KandlerLi/home-infra-docs/docs/runbooks/rotate-secrets.md's
 # own "Automated rotation" section for why: every credential here
 # needs either a human-known plaintext, an external system's own UI,
 # or a blast radius that makes unattended rotation actively harmful).
@@ -74,7 +74,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 tmp_message="$(mktemp)"
-body="$(printf 'The following aws/secrets-manager entries are within %s days of their recorded rotation deadline (rotation-schedule.json):\n\n%s\n\nAfter rotating, update last_rotated in rotation-schedule.json in the same change.\n' \
+body="$(printf 'The following KandlerLi/secrets-manager entries are within %s days of their recorded rotation deadline (rotation-schedule.json):\n\n%s\n\nAfter rotating, update last_rotated in rotation-schedule.json in the same change.\n' \
   "${warn_days}" "$(printf '%s\n\n' "${due_lines[@]}")")"
 
 jq -n --arg subject "Secret rotation reminder (${#due_lines[@]} due)" --arg body "${body}" \

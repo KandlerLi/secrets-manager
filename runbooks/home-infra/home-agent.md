@@ -2,11 +2,11 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["home-infra/home-agent"]`, defined in the root
-`main.tf` (`aws/secrets-manager`) alongside every other secret's own
-container -- a single `for_each` resource, not a per-secret module. Migrated here from `bootstrap/terraform-state`
+`main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-11 — container only, no value.
 
-**Consumed by**: `infra/k3s-apps`' `modules/home_agent`, read via
+**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/home_agent`, read via
 `secrets.tf`. `home_agent_ghcr_token` used to live here too, reused
 directly by `modules/sankey_export` — split out into its own dedicated
 `k3s-apps/ghcr-pull-token` secret 2026-09-12, since it was never really
@@ -21,7 +21,7 @@ Anthropic API key for `home_agent`'s own chat/tool-use calls
 `home_agent_openai_api_key` for this purpose 2026-09-18; Whisper
 speech-to-text stayed on OpenAI (see below), so both keys are live at
 once. Generate a new key in the Anthropic Console, `put-secret-value`,
-`terraform apply` (`infra/k3s-apps`), then revoke the old key once the
+`terraform apply` ([`k3s-apps`](https://github.com/KandlerLi/k3s-apps)), then revoke the old key once the
 new Deployment is confirmed healthy.
 
 ### `home_agent_openai_api_key`
@@ -39,7 +39,7 @@ own `NEXTCLOUD_USERNAME` env var; this doc previously said
 `nextcloud_tools`, which was never the real account name — that was
 the retired Ansible role's own name, not the Nextcloud username it
 managed). No dedicated rotation playbook exists any more —
-`infra/home-infra`'s own `nextcloud_tools` role and its rotation
+[`home-infra`](https://github.com/KandlerLi/home-infra)'s own `nextcloud_tools` role and its rotation
 playbook were retired entirely when `home_agent`/`open_webui` moved to
 k3s-native (commit `018c5ff`). Manual flow:
 ```bash

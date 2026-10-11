@@ -1,5 +1,5 @@
-# gitleaks false positives, confirmed 2026-09-15 -- see the workspace-
-# level PARKED.md "Security audit" entry for the full triage.
+# gitleaks false positives, confirmed 2026-09-15 -- see the "Security
+# audit" entry in the private task list for the full triage.
 #
 # secrets/dyndns/fritzbox/README.md:1 is a doc heading naming this
 # Secrets Manager container's own path, not a secret value (see that

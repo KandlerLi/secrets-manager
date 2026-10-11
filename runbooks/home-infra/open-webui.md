@@ -2,11 +2,11 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["home-infra/open-webui"]`, defined in the root
-`main.tf` (`aws/secrets-manager`) alongside every other secret's own
-container -- a single `for_each` resource, not a per-secret module. Migrated here from `bootstrap/terraform-state`
+`main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-11 — container only, no value.
 
-**Consumed by**: `infra/k3s-apps`' `modules/open_webui`, read via
+**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/open_webui`, read via
 `secrets.tf`.
 
 ## Keys
@@ -24,7 +24,7 @@ a real, if temporary, outage for the whole service.
 `home-infra/authelia.md`'s own note for the exact command), then:
 
 ```bash
-infra/k3s-apps/scripts/rotate-oidc-client-secret.sh openwebui
+k3s-apps/scripts/rotate-oidc-client-secret.sh openwebui
 ```
 
 It prompts silently for each value, rejects an obviously-swapped pair,
