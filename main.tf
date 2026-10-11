@@ -22,18 +22,18 @@ provider "aws" {
 # procedure this followed.
 #
 # julian's IAM grant on these does NOT live here -- it stays in
-# bootstrap/terraform-state/operator.tf (as a wildcard ARN string per
+# KandlerLi/terraform-state/operator.tf (as a wildcard ARN string per
 # secret), next to the rest of julian's operator policy.
 locals {
   secrets = {
     "dyndns/fritzbox" = "HTTP Basic credentials used by the FRITZ!Box DynDNS client"
 
-    "home-infra/authelia"      = "Authelia's own session/storage/OIDC secrets (infra/k3s-apps' modules/authelia)"
+    "home-infra/authelia"      = "Authelia's own session/storage/OIDC secrets (KandlerLi/k3s-apps' modules/authelia)"
     "home-infra/blocky"        = "Blocky's own Postgres query-log password (also read by Grafana's datasource config)"
-    "home-infra/github-runner" = "GitHub App credentials for every repo's self-hosted GitHub Actions runner (bootstrap/k3s-bootstrap's own modules/github_runner)"
+    "home-infra/github-runner" = "GitHub App credentials for every repo's self-hosted GitHub Actions runner (KandlerLi/k3s-bootstrap's own modules/github_runner)"
     # monitoring_grafana_admin_password was dropped from this group's JSON
     # 2026-09-10 -- Grafana's native login and Basic Auth are both disabled
-    # at the protocol level (infra/k3s-apps modules/grafana), so it could
+    # at the protocol level (KandlerLi/k3s-apps modules/grafana), so it could
     # not be used to log in; the k3s copy now generates its own throwaway
     # GF_SECURITY_ADMIN_PASSWORD via random_password. Only the OIDC client
     # secret remains real.
@@ -41,14 +41,14 @@ locals {
     "home-infra/home-agent" = "home_agent's Anthropic API key (chat), OpenAI API key (Whisper STT only, since 2026-09-18), and its nextcloud_tools sidecar's app password (GHCR credentials split out to k3s-apps/ghcr-pull-token 2026-09-12)"
     "home-infra/ingress"    = "The ACME DNS-01 Route53 IAM keypair (dyndns's own traefik-acme-dns01 user)"
     "home-infra/monitoring" = "Alertmanager/Authelia's shared SES SMTP identity and the ntfy relay topic"
-    "home-infra/nextcloud"  = "Nextcloud's own Authelia OIDC client secret (consumed by infra/home-infra's Ansible only -- Nextcloud AIO stays on the homeserver, not k3s)"
+    "home-infra/nextcloud"  = "Nextcloud's own Authelia OIDC client secret (consumed by KandlerLi/home-infra's Ansible only -- Nextcloud AIO stays on the homeserver, not k3s)"
     "home-infra/open-webui" = "Open WebUI's own Authelia OIDC client secret"
 
     "k3s-apps/bulwark"         = "Bulwark webmail's own Authelia OIDC client secret (plaintext half of the pair)"
     "k3s-apps/ghcr-pull-token" = "Account-scoped GHCR pull token, shared by modules/home_agent and modules/sankey_export"
     "k3s-apps/paperless"       = "Paperless-ngx's own Authelia OIDC client secret (plaintext half of the pair)"
     "k3s-apps/sankey-export"   = "sankey_export CronJob's own Nextcloud app password"
-    "k3s-apps/stalwart"        = "Stalwart management-API token (admin API key) used by infra/k3s-apps' Terraform provider"
+    "k3s-apps/stalwart"        = "Stalwart management-API token (admin API key) used by KandlerLi/k3s-apps' Terraform provider"
   }
 }
 

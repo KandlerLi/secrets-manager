@@ -2,12 +2,12 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["k3s-apps/sankey-export"]`, defined in the root
-`main.tf` (`aws/secrets-manager`) alongside every other secret's own
-container -- a single `for_each` resource, not a per-secret module. Migrated here from `bootstrap/terraform-state`
+`main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-10, the pilot for the campaign in that repo's own README —
 container only, no value.
 
-**Consumed by**: `infra/k3s-apps`' `modules/sankey_export`, read via
+**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/sankey_export`, read via
 `secrets.tf`. This module's own image pull also depends on a second,
 separate secret — `k3s-apps/ghcr-pull-token`, shared with
 `modules/home_agent` — not documented here since this file only covers
@@ -28,7 +28,7 @@ script do the rest.
 docker exec nextcloud-aio-nextcloud php occ user:auth-tokens:add \
   --name "rotate-$(date +%F)" -- sankey-export
 
-# then, from an infra/k3s-apps checkout, with `aws login` done (the
+# then, from an k3s-apps checkout, with `aws login` done (the
 # script opens the SSH tunnel itself, like roll-out.sh elsewhere):
 scripts/rotate-sankey-export-app-password.sh 'the-printed-token'
 ```
@@ -63,7 +63,7 @@ An AWS-native rotation Lambda is doubly blocked: no route to the
 private k3s network at all, *and* nothing propagates a `put-secret-value`
 into the live Kubernetes Secret without a `terraform apply` a Lambda
 can't run. See
-`docs/home-infra-docs/docs/runbooks/rotate-secrets.md`'s own reality-check
+[`home-infra-docs/docs/runbooks/rotate-secrets.md`](https://github.com/KandlerLi/home-infra-docs/blob/main/docs/runbooks/rotate-secrets.md)'s own reality-check
 section.
 
 **So**: everything after the mint is automated

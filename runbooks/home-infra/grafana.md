@@ -2,11 +2,11 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["home-infra/grafana"]`, defined in the root
-`main.tf` (`aws/secrets-manager`) alongside every other secret's own
-container -- a single `for_each` resource, not a per-secret module. Migrated here from `bootstrap/terraform-state`
+`main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-10 — container only, no value.
 
-**Consumed by**: `infra/k3s-apps`' `modules/grafana`, read via
+**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/grafana`, read via
 `secrets.tf`.
 
 ## Keys
@@ -18,7 +18,7 @@ secret pair — Authelia holds the matching hash (`home-infra/authelia`'s
 
 **Rotation**: generate a fresh plaintext + hash together (see
 `home-infra/authelia.md`'s own note for the exact command), then
-`infra/k3s-apps/scripts/rotate-oidc-client-secret.sh grafana` — prompts
+`[`k3s-apps/scripts/rotate-oidc-client-secret.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-oidc-client-secret.sh) grafana` — prompts
 silently for each value, rejects an obviously-swapped pair, writes both
 secrets, and runs `terraform apply` (rolls Authelia and Grafana
 together, in sync). Verify for real afterward (browser OIDC flow, can't
@@ -29,7 +29,7 @@ a real login/consent screen and land back in Grafana authenticated.
 
 Grafana's native login form *and* HTTP Basic Auth are both disabled at
 the protocol level (`GF_AUTH_DISABLE_LOGIN_FORM` +
-`GF_AUTH_BASIC_ENABLED=false` in `infra/k3s-apps/modules/grafana`) —
+`GF_AUTH_BASIC_ENABLED=false` in [`k3s-apps/modules/grafana`](https://github.com/KandlerLi/k3s-apps/blob/main/modules/grafana)) —
 Authelia OIDC is the only way in — so this password could not be used
 to log into anything. It was removed from this group's JSON entirely;
 `modules/grafana` now fills `GF_SECURITY_ADMIN_PASSWORD__FILE` from a

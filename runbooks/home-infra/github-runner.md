@@ -2,14 +2,14 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["home-infra/github-runner"]`, defined in the root
-`main.tf` (`aws/secrets-manager`) alongside every other secret's own
+`main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)) alongside every other secret's own
 container -- a single `for_each` resource, not a per-secret module. Migrated here from
-`bootstrap/terraform-state` 2026-09-12 — container only, no value.
+[`terraform-state`](https://github.com/KandlerLi/terraform-state) 2026-09-12 — container only, no value.
 
-**Consumed by**: `bootstrap/k3s-bootstrap`'s `modules/github_runner`,
+**Consumed by**: [`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap)'s `modules/github_runner`,
 read via that repo's own `secrets.tf`. The `k3s-bootstrap-local` IAM
 identity that applies that repo has a dedicated, **read-only** grant
-on this one secret (`bootstrap/terraform-state/k3s_bootstrap_local.tf`,
+on this one secret ([`terraform-state/k3s_bootstrap_local.tf`](https://github.com/KandlerLi/terraform-state/blob/main/k3s_bootstrap_local.tf),
 a wildcard ARN string as of this migration — same pattern as `julian`'s
 own grant on every migrated secret) — unlike `julian`'s own read/write
 grant, since `k3s-bootstrap-local` is a scripted, non-interactive
@@ -42,11 +42,11 @@ private key" button downloads it (real newlines, not escaped `\n` —
 `put-secret-value` JSON-encodes the file's actual content correctly
 either way). Genuinely secret: this is what lets the runner mint a
 real installation access token. Installed on every repository in
-`github/repo-infra/config.yml`'s `runner: true` list, with
+[`repo-infra/config.yml`](https://github.com/KandlerLi/repo-infra/blob/main/config.yml)'s `runner: true` list, with
 `Administration: write` — the exact same permission scope the old PAT
 needed.
 
-`put-secret-value`, then an actual `bootstrap/k3s-bootstrap` apply —
+`put-secret-value`, then an actual [`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap) apply —
 every repo's runner Deployment shares one Kubernetes Secret
 (`modules/github_runner`), so one apply rolls every runner at once
 (the pod-template checksum annotation hashes `app_private_key`
@@ -72,7 +72,7 @@ Not built, and a much smaller gap than the old PAT's own version of
 this section described — GitHub App private keys don't have the same
 "expires and must be manually renewed" pressure a PAT does. If ever
 wanted: a Lambda that calls the App's own key-management API and
-triggers a `bootstrap/k3s-bootstrap` apply afterward, same "not a
+triggers a [`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap) apply afterward, same "not a
 natural fit for Secrets Manager's own native rotation Lambda shape"
 reasoning as before — the credential itself still lives in GitHub, not
 AWS.

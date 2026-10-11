@@ -2,11 +2,11 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["home-infra/blocky"]`, defined in the root
-`main.tf` (`aws/secrets-manager`) alongside every other secret's own
-container -- a single `for_each` resource, not a per-secret module. Migrated here from `bootstrap/terraform-state`
+`main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-12 — container only, no value.
 
-**Consumed by**: `infra/k3s-apps`' `modules/blocky` (the Postgres
+**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/blocky` (the Postgres
 sidecar and Blocky's own `config.yml`) and `modules/grafana` (its own
 Postgres datasource config), both via `secrets.tf`.
 
@@ -33,7 +33,7 @@ that order, so the old value still works during the brief gap between
 the `ALTER USER` and the apply picking it up, rather than locking
 Blocky out.
 
-**Automated as of 2026-09-12**: `infra/k3s-apps/scripts/
+**Automated as of 2026-09-12**: `[`k3s-apps/scripts`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts)
 rotate-blocky-postgres-password.sh` (or the scheduled GitHub Actions
 workflow calling it) does exactly this sequence — see that script's
 own header comment for the full detail.
@@ -41,7 +41,7 @@ own header comment for the full detail.
 ## Automated rotation
 
 Built 2026-09-12 as a scheduled GitHub Actions workflow in
-`infra/k3s-apps` (the in-cluster self-hosted runner already has
+[`k3s-apps`](https://github.com/KandlerLi/k3s-apps) (the in-cluster self-hosted runner already has
 `kubectl` and runs `terraform apply` there) — the one secret in this
 entire workspace where unattended rotation was judged genuinely safe:
 mechanically simple, low blast radius, no external system whose own

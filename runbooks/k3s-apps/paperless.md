@@ -2,10 +2,10 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["k3s-apps/paperless"]`, defined in the
-root `main.tf` (`aws/secrets-manager`). A genuinely new secret, not a
+root `main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)). A genuinely new secret, not a
 migration (ADR 0023).
 
-**Consumed by**: `infra/k3s-apps`' `modules/paperless`, read via
+**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/paperless`, read via
 `secrets.tf`.
 
 Paperless's `PAPERLESS_SECRET_KEY` and its PostgreSQL password are
@@ -22,7 +22,7 @@ Never rotate this alone.
 
 **Rotation**: generate a fresh plaintext + hash together (see
 `home-infra/authelia.md` for the exact command), then
-`infra/k3s-apps/scripts/rotate-oidc-client-secret.sh paperless`, which
+`[`k3s-apps/scripts/rotate-oidc-client-secret.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-oidc-client-secret.sh) paperless`, which
 writes both secrets and runs `terraform apply`. Verify for real
 afterward: sign out, "Sign in with Authelia" must land back in Paperless
 authenticated.

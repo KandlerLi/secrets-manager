@@ -2,15 +2,15 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["dyndns/fritzbox"]`, defined in the root
-`main.tf` (`aws/secrets-manager`) alongside every other secret's own
-container -- a single `for_each` resource, not a per-secret module. Migrated here from `aws/dyndns` 2026-09-12 —
+`main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)) alongside every other secret's own
+container -- a single `for_each` resource, not a per-secret module. Migrated here from [`dyndns`](https://github.com/KandlerLi/dyndns) 2026-09-12 —
 container only, no value. The only secret in this repo whose source
 root is a real CI/PR-gated repo rather than a bootstrap-category one;
 the "source relinquishes" half of the migration went through a normal
-`aws/dyndns` PR ([#26](https://github.com/KandlerLi/dyndns/pull/26)),
+[`dyndns`](https://github.com/KandlerLi/dyndns) PR ([#26](https://github.com/KandlerLi/dyndns/pull/26)),
 not a direct local apply.
 
-**Consumed by**: `aws/dyndns`'s own Lambda (`lambda/handler.py`), which
+**Consumed by**: [`dyndns`](https://github.com/KandlerLi/dyndns)'s own Lambda (`lambda/handler.py`), which
 reads this secret directly (`secretsmanager:GetSecretValue`, a
 wildcard ARN grant on the Lambda's own IAM role since the migration —
 previously a direct resource reference) to validate the FRITZ!Box

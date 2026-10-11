@@ -8,15 +8,15 @@ plaintext git); there is no `aws_secretsmanager_secret_version` resource
 anywhere here.
 
 Bootstrap-category by origin (created by the same SOPS-to-Secrets-Manager
-cutover as `bootstrap/terraform-state`/`bootstrap/k3s-bootstrap`), but
+cutover as [`terraform-state`](https://github.com/KandlerLi/terraform-state)/[`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap)), but
 **CI-applied since 2026-09-13**, unlike those two — it doesn't share
 their self-escalation risk. It never touches IAM at all; `julian`'s own
 read/write grant on every secret lives entirely in
-`bootstrap/terraform-state/operator.tf`, deliberately kept out of this
+[`terraform-state/operator.tf`](https://github.com/KandlerLi/terraform-state/blob/main/operator.tf), deliberately kept out of this
 repo (see "IAM grants live in terraform-state, not here" below). It only
 ever creates empty `aws_secretsmanager_secret` containers — no
 `GetSecretValue`/`PutSecretValue`/`DeleteSecret` anywhere in its
-Terraform. Its own CI role (`github/repo-infra/aws_policies.tf`) is
+Terraform. Its own CI role ([`repo-infra/aws_policies.tf`](https://github.com/KandlerLi/repo-infra/blob/main/aws_policies.tf)) is
 scoped to exactly `CreateSecret`/`DescribeSecret` on the name prefixes
 it already manages — a compromised run can create a bogus empty
 container at worst, never read or write an actual secret value.
@@ -29,7 +29,7 @@ no GitHub-side rename, this is purely local directory grouping.
 ## Why a separate root
 
 These containers were created by the SOPS-to-AWS-Secrets-Manager cutover in
-`bootstrap/terraform-state/secrets_manager.tf`. They're being migrated here
+[`terraform-state/secrets_manager.tf`](https://github.com/KandlerLi/terraform-state/blob/main/secrets_manager.tf). They're being migrated here
 one secret at a time so the secrets concern is cleanly separable from the
 state-bucket bootstrap concern and can grow its own per-secret documentation
 and rotation tooling without bloating `terraform-state`.
@@ -70,15 +70,15 @@ region: eu-central-1
 
 ## Apply model
 
-**CI-applied on merge, same as `infra/k3s-apps`** — PR review is the
+**CI-applied on merge, same as [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)** — PR review is the
 gate, `.github/workflows/apply.yml` runs `terraform apply` via this
 repo's own dedicated OIDC role (`secrets-manager-github-actions`,
-`github/repo-infra/aws_policies.tf`). No `scripts/roll-out.sh` any
+[`repo-infra/aws_policies.tf`](https://github.com/KandlerLi/repo-infra/blob/main/aws_policies.tf)). No `scripts/roll-out.sh` any
 more — retired 2026-09-13 once CI took over the routine path, the same
 way no such script ever existed for `k3s-apps` once its own CI landed
 (this workspace's convention is not to keep a maintained local-apply
 script around once CI covers the same ground, matching how
-`aws/dyndns`'s own `protect-repository.sh` was deleted outright rather
+[`dyndns`](https://github.com/KandlerLi/dyndns)'s own `protect-repository.sh` was deleted outright rather
 than kept as a documented exception). A genuine emergency can still
 fall back to plain local `terraform init/plan/apply` as root — just not
 a routine, scripted path.
@@ -94,7 +94,7 @@ own permissions at all.
 
 `julian`'s `GetSecretValue`/`DescribeSecret`/`PutSecretValue` grant on
 every container is a statement in
-`bootstrap/terraform-state/operator.tf`'s `terraform-operator` policy,
+[`terraform-state/operator.tf`](https://github.com/KandlerLi/terraform-state/blob/main/operator.tf)'s `terraform-operator` policy,
 next to the rest of `julian`'s operator permissions — it does **not**
 move here as containers migrate. Containers still defined in
 `terraform-state`'s own `secrets_manager.tf` are covered there by real
@@ -104,15 +104,15 @@ string (`...:secret:<name>-*`). When `home-infra/github-runner` migrates,
 similarly switches from a resource reference to a wildcard string,
 staying in `terraform-state`.
 
-Consumers (`infra/k3s-apps/secrets.tf`, `bootstrap/k3s-bootstrap/secrets.tf`,
-`infra/home-infra`'s Ansible + `sync_secrets_to_pass.py`) and the
-`github/repo-infra/aws_policies.tf` CI grants all reference secrets **by
+Consumers ([`k3s-apps/secrets.tf`](https://github.com/KandlerLi/k3s-apps/blob/main/secrets.tf), [`k3s-bootstrap/secrets.tf`](https://github.com/KandlerLi/k3s-bootstrap/blob/main/secrets.tf),
+[`home-infra`](https://github.com/KandlerLi/home-infra)'s Ansible + `sync_secrets_to_pass.py`) and the
+[`repo-infra/aws_policies.tf`](https://github.com/KandlerLi/repo-infra/blob/main/aws_policies.tf) CI grants all reference secrets **by
 name / ARN-pattern string**, never by Terraform resource reference — they
 need **zero changes** as secrets migrate here.
 
 A third location, distinct from both of the above: **this repo's own**
 CI role's grant (`CreateSecret`/`DescribeSecret`, not `GetSecretValue`/
-`PutSecretValue`) also lives in `github/repo-infra/aws_policies.tf`, not
+`PutSecretValue`) also lives in [`repo-infra/aws_policies.tf`](https://github.com/KandlerLi/repo-infra/blob/main/aws_policies.tf), not
 here — same convention every other repo's CI permissions already
 follow.
 
@@ -127,7 +127,7 @@ doc. See `k3s-apps/bulwark`/`k3s-apps/stalwart` for real examples.
 ## Per-secret migration procedure (the no-destroy handoff)
 
 **Historical** — this campaign (moving every secret out of
-`bootstrap/terraform-state`) finished 2026-09-12; see "Migration
+[`terraform-state`](https://github.com/KandlerLi/terraform-state)) finished 2026-09-12; see "Migration
 status" below. Kept as a faithful record of what was actually done,
 including its own now-superseded per-secret-module shape (collapsed
 into the single `for_each` resource in 2026-09-22's ponytail-audit
@@ -135,7 +135,7 @@ pass — see "Layout" above) — not a template to follow for a future
 migration, which would need adapting to today's shape first.
 
 Followed the ADR 0006 / ADR 0010 pattern (the `aws-account-bootstrap` →
-`repo-infra` handoff; real `removed`-side example in `aws/dyndns` commit
+`repo-infra` handoff; real `removed`-side example in [`dyndns`](https://github.com/KandlerLi/dyndns) commit
 `d8d6541`). Per secret:
 
 **Phase A — this root gains ownership (nothing removed yet):**
@@ -156,7 +156,7 @@ Followed the ADR 0006 / ADR 0010 pattern (the `aws-account-bootstrap` →
    changes."
 
 **Phase B — `terraform-state` relinquishes (only after A is verified):**
-4. In `bootstrap/terraform-state`: replace the `resource` block with
+4. In [`terraform-state`](https://github.com/KandlerLi/terraform-state): replace the `resource` block with
    `removed { from = aws_secretsmanager_secret.X; lifecycle { destroy = false } }`
    (this side stays committed for the whole campaign). Same commit: in
    `operator.tf`'s `ManageSecretsManagerSecrets`, move that secret's line
@@ -172,8 +172,8 @@ Followed the ADR 0006 / ADR 0010 pattern (the `aws-account-bootstrap` →
 
 **Phase C — verify no gap:**
 6. "No changes" plans in both bootstrap roots; a clean plan in the
-   consuming root (`infra/k3s-apps`, or `ansible-playbook ... --check`
-   for `home-infra/nextcloud`, or a `bootstrap/k3s-bootstrap` plan for
+   consuming root ([`k3s-apps`](https://github.com/KandlerLi/k3s-apps), or `ansible-playbook ... --check`
+   for `home-infra/nextcloud`, or a [`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap) plan for
    `home-infra/github-runner`); a real `aws secretsmanager get-secret-value`
    as `julian`'s own credentials.
 
@@ -187,7 +187,7 @@ Terraform drops the resource from state with no delete API call. Never write
 
 | Secret | Migrated | Notes |
 |---|---|---|
-| `k3s-apps/sankey-export` | **yes (2026-09-10, pilot)** | value also rotated end-to-end via `infra/k3s-apps/scripts/rotate-sankey-export-app-password.sh` |
+| `k3s-apps/sankey-export` | **yes (2026-09-10, pilot)** | value also rotated end-to-end via [`k3s-apps/scripts/rotate-sankey-export-app-password.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-sankey-export-app-password.sh) |
 | `home-infra/grafana` | **yes (2026-09-10)** | `monitoring_grafana_admin_password` retired in the same pass (dead — Grafana native login disabled); only the OIDC client secret remains |
 | `home-infra/open-webui` | **yes (2026-09-11)** | |
 | `home-infra/home-agent` | **yes (2026-09-11)** | |
@@ -195,27 +195,27 @@ Terraform drops the resource from state with no delete API call. Never write
 | `home-infra/monitoring` | **yes (2026-09-11)** | dual consumer — Terraform (`k3s-apps`) and Ansible plan/lookup both verified clean |
 | `home-infra/nextcloud` | **yes (2026-09-11)** | Ansible-only consumer, verified via a direct lookup test |
 | `home-infra/github-runner` | **yes (2026-09-12)** | also switched the `k3s-bootstrap-local` grant to a wildcard string |
-| `dyndns/fritzbox` | **yes (2026-09-12)** | the one group whose source root isn't `bootstrap/terraform-state` — see below |
-| `home-infra/blocky` | **yes (2026-09-12)** | + rotation automation (increment 2, lives in `infra/k3s-apps`) |
+| `dyndns/fritzbox` | **yes (2026-09-12)** | the one group whose source root isn't [`terraform-state`](https://github.com/KandlerLi/terraform-state) — see below |
+| `home-infra/blocky` | **yes (2026-09-12)** | + rotation automation (increment 2, lives in [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)) |
 | `home-infra/authelia` | **yes (2026-09-12)** | last group — 9 keys, highest blast radius |
 
 `k3s-apps/ghcr-pull-token` isn't in this table — it's a genuinely new
 secret, not a migration (split out of `home-infra/home-agent`
 2026-09-12; see `runbooks/k3s-apps/ghcr-pull-token.md`).
 
-`dyndns/fritzbox` didn't come from `bootstrap/terraform-state/
-secrets_manager.tf` at all — it was created directly in `aws/dyndns`
+`dyndns/fritzbox` didn't come from `[`terraform-state`](https://github.com/KandlerLi/terraform-state)/
+secrets_manager.tf` at all — it was created directly in [`dyndns`](https://github.com/KandlerLi/dyndns)
 (a real CI/PR-gated repo), the first and so far only secret in this
 campaign with that shape. Same no-destroy handoff, just with the
-"source relinquishes" half going through a normal `aws/dyndns` PR
+"source relinquishes" half going through a normal [`dyndns`](https://github.com/KandlerLi/dyndns) PR
 ([#26](https://github.com/KandlerLi/dyndns/pull/26)) instead of a
 direct local apply — and its `removed` block lives there permanently,
-not in `bootstrap/terraform-state`, so it was outside the final-sweep
+not in [`terraform-state`](https://github.com/KandlerLi/terraform-state), so it was outside the final-sweep
 count below.
 
 **Final sweep done, 2026-09-12**: all 10 original groups (everything
-except `dyndns/fritzbox`, which relinquishes in `aws/dyndns` itself)
-migrated and stable — `bootstrap/terraform-state/secrets_manager.tf`
+except `dyndns/fritzbox`, which relinquishes in [`dyndns`](https://github.com/KandlerLi/dyndns) itself)
+migrated and stable — [`terraform-state/secrets_manager.tf`](https://github.com/KandlerLi/terraform-state/blob/main/secrets_manager.tf)
 and all 10 `removed` blocks it held are deleted outright.
 `operator.tf`'s `ManageSecretsManagerSecrets` statement stays
 permanently, exactly as anticipated: `julian`'s read/write grant on
@@ -239,11 +239,11 @@ usable directly by every principal that reads or writes a secret
 *value*, not routed through a single AWS service principal the way
 CloudWatch Logs/CloudTrail/SNS are. Tracing the real consumers turned
 up 5 separate IAM identities across 4 repos that would all need new KMS
-grants to keep working: `julian` (`bootstrap/terraform-state/
+grants to keep working: `julian` (`[`terraform-state`](https://github.com/KandlerLi/terraform-state)/
 operator.tf`, read/write on all 12), `dyndns`'s own Lambda role
 (`dyndns/fritzbox`), `k3s-apps`'s CI role (8 of the `home-infra/*`
 groups plus both `k3s-apps/*` ones), and `home_infra_local`/
-`k3s_bootstrap_local` (`bootstrap/terraform-state`, `home-infra/
+`k3s_bootstrap_local` ([`terraform-state`](https://github.com/KandlerLi/terraform-state), `home-infra/
 monitoring`+`nextcloud` and `home-infra/github-runner` respectively).
 Missing even one of those grants means that principal silently loses
 the ability to decrypt a secret it depends on. Not proportionate to
@@ -255,27 +255,27 @@ anything more sensitive than they do today).
 
 Per-secret rotation procedures: `runbooks/`. Cross-cutting rotation categories
 and automated-rotation feasibility:
-`docs/home-infra-docs/docs/runbooks/rotate-secrets.md`. Only
+[`home-infra-docs/docs/runbooks/rotate-secrets.md`](https://github.com/KandlerLi/home-infra-docs/blob/main/docs/runbooks/rotate-secrets.md). Only
 `blocky_postgres_password` gets automated rotation (a scheduled GitHub
-Actions workflow that lives in `infra/k3s-apps`, since bootstrap repos have
+Actions workflow that lives in [`k3s-apps`](https://github.com/KandlerLi/k3s-apps), since bootstrap repos have
 no runner); everything else is manual-by-design.
 
 `rotation-schedule.json` (this repo's own root) plus
-`.github/workflows/check-secret-rotation.yml` close BACKLOG.md's own
+`.github/workflows/check-secret-rotation.yml` close the private task list's
 "Manually-rotated Secrets Manager secrets have no rotation reminder" --
 a **reminder**, not automated rotation: a daily scheduled job emails
 `julian.kandler@outlook.com` once a listed secret is within 7 days of
 its recorded `last_rotated + rotate_every_days` deadline, via the
-already-verified `alerts@jkandler.de` SES identity (`aws/ses-relay`).
+already-verified `alerts@jkandler.de` SES identity ([`ses-relay`](https://github.com/KandlerLi/ses-relay)).
 Covers every real credential in this repo (tracked per-key, not
 per-container, since a multi-key group like `home-infra/authelia`
 holds several keys with unrelated rotation history) except
 `blocky_postgres_password`, which already has real automated rotation
-(`infra/k3s-apps`' `rotate-blocky-postgres.yml`) that this
+([`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `rotate-blocky-postgres.yml`) that this
 manually-maintained file would never stay in sync with. Only
 `k3s-apps/ghcr-pull-token` has a real platform-enforced deadline
 (GitHub's own 90-day classic-PAT expiry -- see
-`docs/home-infra-docs`' own `decisions.md` entry on why that
+[`home-infra-docs`](https://github.com/KandlerLi/home-infra-docs)' own `decisions.md` entry on why that
 has to stay a classic PAT); every other entry's interval is a
 self-imposed hygiene choice, not a hard deadline -- rotate the real
 credential first, then update `last_rotated` in the same change; the

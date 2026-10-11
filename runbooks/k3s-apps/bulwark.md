@@ -2,10 +2,10 @@
 
 **Terraform resource**:
 `aws_secretsmanager_secret.this["k3s-apps/bulwark"]`, defined in the root
-`main.tf` (`aws/secrets-manager`) alongside every other secret's own
+`main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)) alongside every other secret's own
 container -- a single `for_each` resource, not a per-secret module. A genuinely new secret, not a migration.
 
-**Consumed by**: `infra/k3s-apps`' `modules/bulwark`, read via
+**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/bulwark`, read via
 `secrets.tf`.
 
 ## Keys
@@ -17,7 +17,7 @@ secret pair -- Authelia holds the matching hash (`home-infra/authelia`'s
 
 **Rotation**: generate a fresh plaintext + hash together (see
 `home-infra/authelia.md`'s own note for the exact command), then
-`infra/k3s-apps/scripts/rotate-oidc-client-secret.sh bulwark` -- prompts
+`[`k3s-apps/scripts/rotate-oidc-client-secret.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-oidc-client-secret.sh) bulwark` -- prompts
 silently for each value, rejects an obviously-swapped pair, writes both
 secrets, and runs `terraform apply` (rolls Authelia and Bulwark
 together, in sync). Verify for real afterward (browser OIDC flow, can't
