@@ -11,19 +11,7 @@ provider "aws" {
   region = var.aws_region
 }
 
-# One aws_secretsmanager_secret per group, in one for_each -- collapsed
-# 2026-09-22 (ponytail-audit) from 14 near-identical one-resource module
-# directories (each just this same resource + an `arn` output, differing
-# only in name/description). Every group's own README.md stays exactly
-# where it was, under secrets/<owning-repo>/<service>/ -- only the
-# mechanical Terraform wrapper around it is gone. The `moved` blocks
-# below remap existing state with no destroy/create API call; see
-# README.md's own "Collapsing the per-secret modules" note for the
-# procedure this followed.
-#
-# julian's IAM grant on these does NOT live here -- it stays in
-# KandlerLi/terraform-state/operator.tf (as a wildcard ARN string per
-# secret), next to the rest of julian's operator policy.
+# julian's read/write grant on these lives in terraform-state's operator.tf, not here.
 locals {
   secrets = {
     "dyndns/fritzbox" = "HTTP Basic credentials used by the FRITZ!Box DynDNS client"
@@ -31,18 +19,12 @@ locals {
     "home-infra/authelia"      = "Authelia's own session/storage/OIDC secrets (KandlerLi/k3s-apps' modules/authelia)"
     "home-infra/blocky"        = "Blocky's own Postgres query-log password (also read by Grafana's datasource config)"
     "home-infra/github-runner" = "GitHub App credentials for every repo's self-hosted GitHub Actions runner (KandlerLi/k3s-bootstrap's own modules/github_runner)"
-    # monitoring_grafana_admin_password was dropped from this group's JSON
-    # 2026-09-10 -- Grafana's native login and Basic Auth are both disabled
-    # at the protocol level (KandlerLi/k3s-apps modules/grafana), so it could
-    # not be used to log in; the k3s copy now generates its own throwaway
-    # GF_SECURITY_ADMIN_PASSWORD via random_password. Only the OIDC client
-    # secret remains real.
-    "home-infra/grafana"    = "Grafana's own Authelia OIDC client secret (plaintext half of the pair)"
-    "home-infra/home-agent" = "home_agent's Anthropic API key (chat), OpenAI API key (Whisper STT only, since 2026-09-18), and its nextcloud_tools sidecar's app password (GHCR credentials split out to k3s-apps/ghcr-pull-token 2026-09-12)"
-    "home-infra/ingress"    = "The ACME DNS-01 Route53 IAM keypair (dyndns's own traefik-acme-dns01 user)"
-    "home-infra/monitoring" = "Alertmanager/Authelia's shared SES SMTP identity and the ntfy relay topic"
-    "home-infra/nextcloud"  = "Nextcloud's own Authelia OIDC client secret (consumed by KandlerLi/home-infra's Ansible only -- Nextcloud AIO stays on the homeserver, not k3s)"
-    "home-infra/open-webui" = "Open WebUI's own Authelia OIDC client secret"
+    "home-infra/grafana"       = "Grafana's own Authelia OIDC client secret (plaintext half of the pair)"
+    "home-infra/home-agent"    = "home_agent's Anthropic API key (chat), OpenAI API key (Whisper STT only, since 2026-09-18), and its nextcloud_tools sidecar's app password (GHCR credentials split out to k3s-apps/ghcr-pull-token 2026-09-12)"
+    "home-infra/ingress"       = "The ACME DNS-01 Route53 IAM keypair (dyndns's own traefik-acme-dns01 user)"
+    "home-infra/monitoring"    = "Alertmanager/Authelia's shared SES SMTP identity and the ntfy relay topic"
+    "home-infra/nextcloud"     = "Nextcloud's own Authelia OIDC client secret (consumed by KandlerLi/home-infra's Ansible only -- Nextcloud AIO stays on the homeserver, not k3s)"
+    "home-infra/open-webui"    = "Open WebUI's own Authelia OIDC client secret"
 
     "k3s-apps/bulwark"         = "Bulwark webmail's own Authelia OIDC client secret (plaintext half of the pair)"
     "k3s-apps/ghcr-pull-token" = "Account-scoped GHCR pull token, shared by modules/home_agent and modules/sankey_export"
@@ -52,12 +34,7 @@ locals {
   }
 }
 
-# AWS-0098 (should use a customer managed key) suppressed, not fixed --
-# see README.md, "Trivy AWS-0098 (customer-managed key) suppressed, not
-# fixed" for why. Container only for every instance: name, description,
-# recovery window. Never a value -- real secret material is set
-# out-of-band via `aws secretsmanager put-secret-value`, never an
-# aws_secretsmanager_secret_version resource.
+# Containers only, values are set out-of-band. AWS-0098 suppressed: see README.
 #trivy:ignore:AVD-AWS-0098
 resource "aws_secretsmanager_secret" "this" {
   for_each = local.secrets
@@ -71,19 +48,12 @@ resource "aws_secretsmanager_secret" "this" {
   }
 }
 
-# Refactored 2026-09-10 from a bare `resource` in the old
-# secrets_manager.tf into a per-secret module -- a within-state address
-# change, no API call, prevent_destroy untouched. Safe to remove once no
-# state predates it.
+# State-address remaps from past refactors: see README, "Collapsing the per-secret modules".
 moved {
   from = aws_secretsmanager_secret.k3s_apps_sankey_export
   to   = module.k3s_apps_sankey_export.aws_secretsmanager_secret.this
 }
 
-# Collapsed 2026-09-22 (ponytail-audit) from 14 per-secret modules into
-# the single for_each resource above -- again a within-state address
-# change only, no API call, prevent_destroy untouched throughout. Safe
-# to remove once no state predates it.
 moved {
   from = module.k3s_apps_sankey_export.aws_secretsmanager_secret.this
   to   = aws_secretsmanager_secret.this["k3s-apps/sankey-export"]

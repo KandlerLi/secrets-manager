@@ -289,6 +289,12 @@ the coordinated two-secret procedure and cross-references the matching
 half in `runbooks/home-infra/authelia.md`, so one link per entry
 is still enough even though those pairs span two secret groups.
 
+`scripts/check-secret-rotation.sh` does the check and sends the mail. It
+needs an AWS session with `ses:SendEmail` on the `jkandler.de` identity
+and `jq` on PATH; the workflow provides both (its OIDC role, and an
+`apt-get install` of exactly what this one job needs). It never rotates
+anything itself.
+
 `rotation-schedule.md` is a generated, human-readable rendering of
 `rotation-schedule.json` for browsing on GitHub -- a Markdown table,
 sorted soonest-to-expire first, since GitHub renders `.json` as

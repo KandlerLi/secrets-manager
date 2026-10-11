@@ -1,21 +1,5 @@
 #!/usr/bin/env bash
-# Reads rotation-schedule.json (this repo's own root -- see its own
-# "_comment" and README.md's Rotation section) and emails a reminder
-# for any secret within warn_days of its recorded last_rotated +
-# rotate_every_days deadline. Built to run from this repo's own
-# scheduled GitHub Actions workflow (check-secret-rotation.yml) --
-# needs an AWS session with ses:SendEmail on the jkandler.de identity
-# (that workflow's own OIDC role assumption covers this) and jq on
-# PATH (installed by the calling workflow -- not baked into the runner
-# image itself, same "install exactly what this one workflow needs"
-# precedent KandlerLi/k3s-apps' own rotate-blocky-postgres-password.sh
-# already uses for psql).
-#
-# Never rotates anything itself -- this is a reminder, not automated
-# rotation (see KandlerLi/home-infra-docs/docs/runbooks/rotate-secrets.md's
-# own "Automated rotation" section for why: every credential here
-# needs either a human-known plaintext, an external system's own UI,
-# or a blast radius that makes unattended rotation actively harmful).
+# Emails a reminder for secrets near their rotation deadline: see README, "Rotation".
 
 set -euo pipefail
 
