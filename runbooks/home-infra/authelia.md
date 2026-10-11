@@ -116,5 +116,5 @@ crypto material (unattended rotation is actively harmful given the
 logout/re-auth blast radius on session or OIDC-signing material, not
 merely unnecessary) or the coordinated OIDC pairs (need a redeploy of
 the *other* secret's consumer too, in lockstep). See
-`docs/home-infra-docs/docs/runbooks/rotate-secrets.md`'s own "reality
+`home-infra-docs/docs/runbooks/rotate-secrets.md`'s own "reality
 check" section for the fuller reasoning.

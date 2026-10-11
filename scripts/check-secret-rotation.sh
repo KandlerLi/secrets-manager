@@ -12,7 +12,7 @@
 # already uses for psql).
 #
 # Never rotates anything itself -- this is a reminder, not automated
-# rotation (see docs/home-infra-docs/docs/runbooks/rotate-secrets.md's
+# rotation (see home-infra-docs/docs/runbooks/rotate-secrets.md's
 # own "Automated rotation" section for why: every credential here
 # needs either a human-known plaintext, an external system's own UI,
 # or a blast radius that makes unattended rotation actively harmful).

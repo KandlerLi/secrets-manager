@@ -63,7 +63,7 @@ An AWS-native rotation Lambda is doubly blocked: no route to the
 private k3s network at all, *and* nothing propagates a `put-secret-value`
 into the live Kubernetes Secret without a `terraform apply` a Lambda
 can't run. See
-`docs/home-infra-docs/docs/runbooks/rotate-secrets.md`'s own reality-check
+`home-infra-docs/docs/runbooks/rotate-secrets.md`'s own reality-check
 section.
 
 **So**: everything after the mint is automated

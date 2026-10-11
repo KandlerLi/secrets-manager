@@ -255,7 +255,7 @@ anything more sensitive than they do today).
 
 Per-secret rotation procedures: `runbooks/`. Cross-cutting rotation categories
 and automated-rotation feasibility:
-`docs/home-infra-docs/docs/runbooks/rotate-secrets.md`. Only
+`home-infra-docs/docs/runbooks/rotate-secrets.md`. Only
 `blocky_postgres_password` gets automated rotation (a scheduled GitHub
 Actions workflow that lives in `infra/k3s-apps`, since bootstrap repos have
 no runner); everything else is manual-by-design.
@@ -275,7 +275,7 @@ holds several keys with unrelated rotation history) except
 manually-maintained file would never stay in sync with. Only
 `k3s-apps/ghcr-pull-token` has a real platform-enforced deadline
 (GitHub's own 90-day classic-PAT expiry -- see
-`docs/home-infra-docs`' own `decisions.md` entry on why that
+`home-infra-docs`' own `decisions.md` entry on why that
 has to stay a classic PAT); every other entry's interval is a
 self-imposed hygiene choice, not a hard deadline -- rotate the real
 credential first, then update `last_rotated` in the same change; the

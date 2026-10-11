@@ -4,7 +4,7 @@ One file per `aws_secretsmanager_secret` container, path mirroring the
 secret's own name (`home-infra/authelia` -> `home-infra/authelia.md`),
 covering what its keys are, who consumes them, and exactly how to
 rotate each one. See
-`docs/home-infra-docs/docs/runbooks/rotate-secrets.md` for the
+`home-infra-docs/docs/runbooks/rotate-secrets.md` for the
 cross-cutting rotation categories and automated-rotation feasibility
 these draw from. The actual Terraform (a single `for_each
 aws_secretsmanager_secret.this` resource, one entry per secret in

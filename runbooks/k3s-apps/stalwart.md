@@ -16,7 +16,7 @@ settings as code.
 An **API key on Stalwart's `admin` account**, created just for
 Terraform (one of the account's max 5 keys). It authenticates as a
 Bearer token against the management API (`POST /jmap/`, see
-`docs/home-infra-docs/docs/runbooks/stalwart-mail-server.md`). It works
+`home-infra-docs/docs/runbooks/stalwart-mail-server.md`). It works
 regardless of the server's Authentication Directory setting, which is
 the whole reason it's the right credential here.
 
