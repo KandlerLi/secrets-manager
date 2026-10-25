@@ -39,6 +39,26 @@ own `authelia storage encryption change-key` against the live database
 first, or the database stays encrypted with the old key while Authelia
 expects the new one, breaking every existing TOTP registration.
 
+### Rotating the session secret, storage key and issuer key together
+[`k3s-apps/scripts/rotate-authelia-internal-secrets.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-authelia-internal-secrets.sh)
+rotates `authelia_session_secret`, `authelia_storage_encryption_key` and
+`authelia_oidc_issuer_private_key` in one go: fresh backup job, new
+values generated in memory, written to this secret **before**
+`change-key` re-encrypts the live database, a check against the new
+key, then `terraform apply` to roll the Pod. Values never appear in
+argv, files or output. Blast radius: everyone logged out, every OIDC
+client session ends.
+
+Before running it: `aws login` as an identity that can write this
+secret **and** read `k3s-apps`' Terraform state, plus
+`kubectl port-forward svc/stalwart-internal 18083:8080` (the local
+apply needs the Stalwart provider). On 2026-10-25 the first run died
+at the apply with a state-access 403, after `change-key` had already
+run: the database and this secret already held the new key, the Pod
+still the old one. That state is finished with `terraform apply`
+alone; never roll this secret back and never re-run the script then,
+since it would generate a key the database doesn't have.
+
 ### `authelia_reset_password_jwt_secret`
 Signs the password-reset email's JWT link (config's
 `identity_validation.reset_password.jwt_secret`). Generate the same
