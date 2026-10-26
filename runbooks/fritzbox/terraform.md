@@ -4,7 +4,7 @@
 in the root `main.tf`, container only; the value is set out-of-band with
 `aws secretsmanager put-secret-value` (never in Terraform).
 
-**Consumed by**: `KandlerLi/fritzbox` (local apply only, not on GitHub yet),
+**Consumed by**: `KandlerLi/fritzbox` (private repo, local apply only),
 whose `terraform-provider-fritzbox` reads `FRITZBOX_USERNAME` /
 `FRITZBOX_PASSWORD`. Its README fetches the password from here, one key at
 a time, into the environment of the shell running `terraform`. `julian`
