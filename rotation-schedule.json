@@ -19,14 +19,14 @@
       "id": "home-infra/authelia:authelia_session_secret",
       "description": "Category B. Rotating logs out every active session immediately. No platform-enforced expiry, and deliberately not something to rotate casually -- a long, loose interval, not a real deadline.",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/authelia.md",
-      "last_rotated": "2026-09-17",
+      "last_rotated": "2026-10-25",
       "rotate_every_days": 730
     },
     {
       "id": "home-infra/authelia:authelia_storage_encryption_key",
       "description": "Category B. Encrypts session/TOTP state in Authelia's own SQLite file -- rotating needs `authelia storage encryption change-key` against the live database, never a plain value swap. Same loose, non-urgent interval as the rest of this category.",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/authelia.md",
-      "last_rotated": "2026-09-17",
+      "last_rotated": "2026-10-25",
       "rotate_every_days": 730
     },
     {
@@ -47,7 +47,7 @@
       "id": "home-infra/authelia:authelia_oidc_issuer_private_key",
       "description": "Category B. Same blast radius as authelia_oidc_hmac_secret -- logs every live OIDC session out across Grafana, Open WebUI, and Nextcloud simultaneously.",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/authelia.md",
-      "last_rotated": "2026-09-17",
+      "last_rotated": "2026-10-25",
       "rotate_every_days": 730
     },
     {
