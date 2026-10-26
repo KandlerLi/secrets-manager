@@ -57,6 +57,8 @@ not migrations.
 - [dyndns/fritzbox](dyndns/fritzbox.md) — the FRITZ!Box router's own
   HTTP Basic Auth credentials, the only secret here whose source root
   is [`dyndns`](https://github.com/KandlerLi/dyndns) rather than [`terraform-state`](https://github.com/KandlerLi/terraform-state)
+- [fritzbox/terraform](fritzbox/terraform.md) — the dedicated FRITZ!Box
+  user `KandlerLi/fritzbox`'s Terraform logs in as (TR-064)
 
 Every container has `lifecycle { prevent_destroy = true }` — these are
 foundational, load-bearing resources for every service migrated off
