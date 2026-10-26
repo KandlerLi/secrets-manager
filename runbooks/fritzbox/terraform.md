@@ -23,11 +23,11 @@ user. TR-064 needs "Allow access for applications" enabled on the box.
 1. In the FRITZ!Box UI, set a new password on that user.
 2. Write it here without it ever appearing on a command line:
    ```bash
-   read -rs "P?new password: "; echo
-   aws secretsmanager get-secret-value --secret-id fritzbox/terraform \
+   read -rs 'P?new password: '; echo
+   aws secretsmanager get-secret-value --region eu-central-1 --secret-id fritzbox/terraform \
      --query SecretString --output text \
      | P="$P" jq -c '.password = env.P' \
-     | aws secretsmanager put-secret-value --secret-id fritzbox/terraform \
+     | aws secretsmanager put-secret-value --region eu-central-1 --secret-id fritzbox/terraform \
        --secret-string file:///dev/stdin --query VersionId --output text; unset P
    ```
 3. `terraform plan` in `KandlerLi/fritzbox` must authenticate and show no
