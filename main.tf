@@ -16,6 +16,8 @@ locals {
   secrets = {
     "dyndns/fritzbox" = "HTTP Basic credentials used by the FRITZ!Box DynDNS client"
 
+    "fritzbox/terraform" = "The dedicated FRITZ!Box user KandlerLi/fritzbox's Terraform authenticates to TR-064 as"
+
     "home-infra/authelia"      = "Authelia's own session/storage/OIDC secrets (KandlerLi/k3s-apps' modules/authelia)"
     "home-infra/blocky"        = "Blocky's own Postgres query-log password (also read by Grafana's datasource config)"
     "home-infra/github-runner" = "GitHub App credentials for every repo's self-hosted GitHub Actions runner (KandlerLi/k3s-bootstrap's own modules/github_runner)"
