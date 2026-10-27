@@ -20,7 +20,7 @@ needs the change made directly; Secrets Manager having the new value
 isn't enough on its own:
 
 ```bash
-kubectl exec -it deploy/blocky -c postgres -- psql -U blocky -c \
+kubectl -n apps exec -it deploy/blocky -c postgres -- psql -U blocky -c \
   "ALTER USER blocky WITH PASSWORD '<new-password>';"
 ```
 

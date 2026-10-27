@@ -51,7 +51,7 @@ client session ends.
 
 Before running it: `aws login` as an identity that can write this
 secret **and** read `k3s-apps`' Terraform state, plus
-`kubectl port-forward svc/stalwart-internal 18083:8080` (the local
+`kubectl -n apps port-forward svc/stalwart-internal 18083:8080` (the local
 apply needs the Stalwart provider). On 2026-10-25 the first run died
 at the apply with a state-access 403, after `change-key` had already
 run: the database and this secret already held the new key, the Pod
