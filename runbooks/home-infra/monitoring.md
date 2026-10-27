@@ -12,7 +12,7 @@ and `modules/authelia` (same SES identity, reused for Authelia's own
 password-reset emails rather than provisioning a second one — also
 `checksum/config`), both via `secrets.tf`. [`home-infra`](https://github.com/KandlerLi/home-infra)'s own
 Ansible (`ansible/playbooks/site.yml`'s `pre_tasks`) also reads all
-three keys directly, but — confirmed live 2026-09-11 while rotating
+three keys above directly, but — confirmed live 2026-09-11 while rotating
 this group for real — only to `ansible.builtin.assert` they're
 non-empty/non-placeholder; nothing templates them into a file any
 more (Alertmanager itself moved to k3s outright, Phase 2 of the
@@ -66,6 +66,32 @@ so it still belongs in Secrets Manager, but "rotating" it just means
 picking a new unguessable string and updating both the publisher
 (wherever alerts get sent from) and subscriber (the ntfy app/client)
 to match — no cryptographic material involved.
+
+### `monitoring_k3s_kubelet_token`
+ServiceAccount token (`prometheus-kubelet`, `get` on `nodes/metrics`
+only) that the homeserver's Prometheus uses to scrape each kubelet's
+`/metrics/cadvisor`. Made by
+[`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap)'s `kubelet_metrics_rbac.tf`; only
+[`home-infra`](https://github.com/KandlerLi/home-infra)'s `site.yml` reads it, into a `0400` file for
+Prometheus, which rereads it on every scrape.
+
+Copy it in, after a `k3s-bootstrap` apply, with the kubectl tunnel open
+and `aws login` done. The token never reaches the screen or argv:
+```bash
+T="$(kubectl get secret prometheus-kubelet-token -o jsonpath='{.data.token}' | base64 -d)"
+aws secretsmanager get-secret-value --region eu-central-1 --secret-id home-infra/monitoring \
+  --query SecretString --output text \
+  | T="$T" jq -c '.monitoring_k3s_kubelet_token = env.T' \
+  | aws secretsmanager put-secret-value --region eu-central-1 --secret-id home-infra/monitoring \
+    --secret-string file:///dev/stdin --query VersionId --output text; unset T
+```
+Then run `site.yml`; the `k3s_kubelet_cadvisor` targets in Prometheus
+must be `up`.
+
+**Rotating**: in `k3s-bootstrap`, `terraform apply
+-replace=kubernetes_secret_v1.prometheus_kubelet_token` (the old token
+dies with the Secret), then the copy above and `site.yml`. The scrape
+fails with 401 in between.
 
 ## Automated rotation
 

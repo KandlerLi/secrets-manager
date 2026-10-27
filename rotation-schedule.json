@@ -128,6 +128,13 @@
       "rotate_every_days": 730
     },
     {
+      "id": "home-infra/monitoring:monitoring_k3s_kubelet_token",
+      "description": "Long-lived k3s ServiceAccount token (nodes/metrics get only) for the homeserver's Prometheus. Terraform-managed in KandlerLi/k3s-bootstrap: rotate with terraform apply -replace, then copy it in again.",
+      "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/monitoring.md",
+      "last_rotated": "2026-10-27",
+      "rotate_every_days": 365
+    },
+    {
       "id": "k3s-apps/sankey-export:sankey_export_app_password",
       "description": "Category E. sankey_export CronJob's own Nextcloud app password. KandlerLi/k3s-apps/scripts/rotate-sankey-export-app-password.sh handles everything after a fresh occ-minted token.",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/k3s-apps/sankey-export.md",
