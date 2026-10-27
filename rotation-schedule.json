@@ -128,9 +128,16 @@
       "rotate_every_days": 730
     },
     {
-      "id": "home-infra/monitoring:monitoring_k3s_kubelet_token",
+      "id": "home-infra/prometheus:monitoring_k3s_kubelet_token",
       "description": "Long-lived k3s ServiceAccount token (nodes/metrics get only) for the homeserver's Prometheus. Terraform-managed in KandlerLi/k3s-bootstrap: rotate with terraform apply -replace, then copy it in again.",
-      "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/monitoring.md",
+      "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/prometheus.md",
+      "last_rotated": "2026-10-27",
+      "rotate_every_days": 365
+    },
+    {
+      "id": "home-infra/prometheus:monitoring_github_runner_exporter_token",
+      "description": "Fine-grained PAT, Administration and Actions read-only on the runner repos, 1-year expiry set by GitHub. Regenerate in the GitHub UI, then write it in again.",
+      "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/prometheus.md",
       "last_rotated": "2026-10-27",
       "rotate_every_days": 365
     },

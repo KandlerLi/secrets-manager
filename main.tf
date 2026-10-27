@@ -27,6 +27,7 @@ locals {
     "home-infra/monitoring"    = "Alertmanager/Authelia's shared SES SMTP identity and the ntfy relay topic"
     "home-infra/nextcloud"     = "Nextcloud's own Authelia OIDC client secret (consumed by KandlerLi/home-infra's Ansible only -- Nextcloud AIO stays on the homeserver, not k3s)"
     "home-infra/open-webui"    = "Open WebUI's own Authelia OIDC client secret"
+    "home-infra/prometheus"    = "Tokens the homeserver's Prometheus and GitHub runner exporter read with (consumed by KandlerLi/home-infra's Ansible only)"
 
     "k3s-apps/bulwark"         = "Bulwark webmail's own Authelia OIDC client secret (plaintext half of the pair)"
     "k3s-apps/ghcr-pull-token" = "Account-scoped GHCR pull token, shared by modules/home_agent and modules/sankey_export"
