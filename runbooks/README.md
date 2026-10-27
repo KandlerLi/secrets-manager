@@ -48,6 +48,9 @@ not migrations.
   retired, not migrated)
 - [home-infra/monitoring](home-infra/monitoring.md) — the SES SMTP
   identity (a derived, not chosen, password) and the ntfy topic
+- [home-infra/prometheus](home-infra/prometheus.md) — the k3s kubelet
+  scrape token and the GitHub runner exporter's read-only PAT
+  (Ansible-consumed, not Terraform; created, not migrated)
 - [home-infra/github-runner](home-infra/github-runner.md) — the
   shared GitHub Actions runner's GitHub App credentials (switched from
   a PAT 2026-09-16), read by the `k3s-bootstrap-local` scripted
