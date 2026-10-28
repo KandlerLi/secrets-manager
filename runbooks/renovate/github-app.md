@@ -34,9 +34,10 @@ The App's private key, PEM, as downloaded from GitHub.
   or account level.
 - "Only on this account".
 
-Then *Install App* → *Only select repositories*: the repos listed in
-`renovate`'s `config.js` (`repositories`). Generate a private key; the
-`.pem` downloads.
+Then *Credentials → Key pairs → New key*; the `.pem` downloads (GitHub
+allows installing only after that). Then *Install App* → *Only select
+repositories*: the repos listed in `renovate`'s `config.js` (`slots`).
+The App ID is under *General*.
 
 Write both keys, with `aws login` done. The key goes from the file,
 never through argv or the screen:
@@ -53,6 +54,6 @@ workflow*); the "Mint App token" step succeeds.
 
 ## Rotating
 
-Generate a new private key on the App's settings page, write it in as
-above (same `app_id`), run the workflow once to check, then delete the
-old key on the App's settings page. Nothing else changes.
+Create a new key under *Credentials → Key pairs*, write it in as above
+(same `app_id`), run the workflow once to check, then delete the old key
+there. Nothing else changes.
