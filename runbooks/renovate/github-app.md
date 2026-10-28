@@ -42,7 +42,7 @@ The App ID is under *General*.
 Write both keys, with `aws login` done. The key goes from the file,
 never through argv or the screen:
 ```bash
-read -r -p "App ID: " APP_ID
+printf 'App ID: '; read -r APP_ID   # read -p means something else in zsh
 jq -n --arg id "$APP_ID" --rawfile key ~/Downloads/kandlerli-renovate.*.private-key.pem \
   '{app_id: $id, app_private_key: $key}' \
   | aws secretsmanager put-secret-value --region eu-central-1 --secret-id renovate/github-app \
