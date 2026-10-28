@@ -51,6 +51,9 @@ not migrations.
 - [home-infra/prometheus](home-infra/prometheus.md) — the k3s kubelet
   scrape token and the GitHub runner exporter's read-only PAT
   (Ansible-consumed, not Terraform; created, not migrated)
+- [renovate/github-app](renovate/github-app.md) — the GitHub App
+  `renovate`'s workflow opens dependency update PRs with (created, not
+  migrated)
 - [home-infra/github-runner](home-infra/github-runner.md) — the
   shared GitHub Actions runner's GitHub App credentials (switched from
   a PAT 2026-09-16), read by the `k3s-bootstrap-local` scripted
