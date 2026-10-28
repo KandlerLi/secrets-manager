@@ -34,6 +34,8 @@ locals {
     "k3s-apps/paperless"       = "Paperless-ngx's own Authelia OIDC client secret (plaintext half of the pair)"
     "k3s-apps/sankey-export"   = "sankey_export CronJob's own Nextcloud app password"
     "k3s-apps/stalwart"        = "Stalwart management-API token (admin API key) used by KandlerLi/k3s-apps' Terraform provider"
+
+    "renovate/github-app" = "GitHub App credentials KandlerLi/renovate's scheduled workflow opens dependency update PRs with"
   }
 }
 
