@@ -15,9 +15,10 @@ don't trigger the target repo's CI.
 
 ## Keys
 
-### `app_id`
-The App's numeric ID, from its settings page. Not secret, kept here so
-the workflow needs one lookup.
+### `client_id`
+The App's Client ID (`Iv23…`), from its settings page. Not secret, kept
+here so the workflow needs one lookup. `actions/create-github-app-token`
+takes it instead of the deprecated numeric App ID.
 
 ### `app_private_key`
 The App's private key, PEM, as downloaded from GitHub.
@@ -37,14 +38,14 @@ The App's private key, PEM, as downloaded from GitHub.
 Then *Credentials → Key pairs → New key*; the `.pem` downloads (GitHub
 allows installing only after that). Then *Install App* → *Only select
 repositories*: the repos listed in `renovate`'s `config.js` (`slots`).
-The App ID is under *General*.
+The Client ID is under *General* → *About*.
 
 Write both keys, with `aws login` done. The key goes from the file,
 never through argv or the screen:
 ```bash
-printf 'App ID: '; read -r APP_ID   # read -p means something else in zsh
-jq -n --arg id "$APP_ID" --rawfile key ~/Downloads/kandlerli-renovate.*.private-key.pem \
-  '{app_id: $id, app_private_key: $key}' \
+printf 'Client ID: '; read -r CLIENT_ID   # read -p means something else in zsh
+jq -n --arg id "$CLIENT_ID" --rawfile key ~/Downloads/kandlerli-renovate.*.private-key.pem \
+  '{client_id: $id, app_private_key: $key}' \
   | aws secretsmanager put-secret-value --region eu-central-1 --secret-id renovate/github-app \
     --secret-string file:///dev/stdin --query VersionId --output text
 rm ~/Downloads/kandlerli-renovate.*.private-key.pem
@@ -55,5 +56,5 @@ workflow*); the "Mint App token" step succeeds.
 ## Rotating
 
 Create a new key under *Credentials → Key pairs*, write it in as above
-(same `app_id`), run the workflow once to check, then delete the old key
+(same `client_id`), run the workflow once to check, then delete the old key
 there. Nothing else changes.
