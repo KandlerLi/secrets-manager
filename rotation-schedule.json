@@ -171,7 +171,7 @@
     },
     {
       "id": "renovate/github-app",
-      "description": "Category F. GitHub App credentials (app_id/app_private_key) for KandlerLi/renovate. No platform-enforced expiry on the App's private key; self-imposed hygiene interval.",
+      "description": "Category F. GitHub App credentials (client_id/app_private_key) for KandlerLi/renovate. No platform-enforced expiry on the App's private key; self-imposed hygiene interval.",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/renovate/github-app.md",
       "last_rotated": "2026-10-28",
       "rotate_every_days": 365
