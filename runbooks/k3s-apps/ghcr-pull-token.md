@@ -17,6 +17,11 @@ name; `home-infra/home-agent`'s own group used to hold this too, which
 made rotating "home-agent's own secrets" silently also roll a
 completely unrelated CronJob.
 
+Since 2026-10-30 also read by [`renovate`](https://github.com/KandlerLi/renovate)'s
+scheduled workflow (only the `token` key, masked), to look up new
+digests of both images (tracker #46). It reads the value at each run,
+so a rotation needs nothing there.
+
 ## Keys
 
 ### `token`
