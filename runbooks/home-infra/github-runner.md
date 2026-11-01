@@ -7,7 +7,10 @@ container -- a single `for_each` resource, not a per-secret module. Migrated her
 [`terraform-state`](https://github.com/KandlerLi/terraform-state) 2026-09-12 — container only, no value.
 
 **Consumed by**: [`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap)'s `modules/github_runner`,
-read via that repo's own `secrets.tf`. The `k3s-bootstrap-local` IAM
+read via that repo's own `secrets.tf`. Since 2026-11-01 that module runs
+ARC (actions-runner-controller), which gets its Kubernetes Secret
+`arc-github-app` in `ci` from this one, plus the App's installation ID
+(not secret, a `k3s-bootstrap` variable). The `k3s-bootstrap-local` IAM
 identity that applies that repo has a dedicated, **read-only** grant
 on this one secret ([`terraform-state/k3s_bootstrap_local.tf`](https://github.com/KandlerLi/terraform-state/blob/main/k3s_bootstrap_local.tf),
 a wildcard ARN string as of this migration — same pattern as `julian`'s
@@ -21,10 +24,10 @@ identity; only `julian`'s own credentials edit/rotate this value.
 `github_runner_github_token` — a durable, fine-grained PAT with
 `Administration: write` on every self-hosted-runner repository,
 manually rotated on GitHub's own expiry schedule. Switched to GitHub
-App credentials instead — `myoung34/github-runner` (the runner image
-`modules/github_runner` uses) natively mints its own short-lived
-registration token from these at container start, removing the manual
-rotation chore entirely rather than just making it easier.
+App credentials instead, removing the manual rotation chore entirely
+rather than just making it easier. Since 2026-11-01 the ARC controller
+and its listeners use them to register each runner Pod with a one-time
+JIT config; the runner Pods never see the key.
 
 ### `app_id`
 
@@ -46,13 +49,11 @@ real installation access token. Installed on every repository in
 `Administration: write` — the exact same permission scope the old PAT
 needed.
 
-`put-secret-value`, then an actual [`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap) apply —
-every repo's runner Deployment shares one Kubernetes Secret
-(`modules/github_runner`), so one apply rolls every runner at once
-(the pod-template checksum annotation hashes `app_private_key`
-specifically, so Kubernetes only actually restarts anything when the
-key itself changes). Confirm at least one runner re-registered
-successfully post-apply before doing anything to the old key.
+`put-secret-value`, then an actual [`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap) apply,
+which updates `arc-github-app` for every repository's scale set at once.
+Not yet exercised with ARC: whether the listeners pick up a changed key
+without a restart is unverified. So confirm that a job still gets a
+runner after the apply before doing anything to the old key.
 
 ## Rotating the App's own key
 
@@ -62,8 +63,8 @@ suspected compromised, or as a periodic hygiene practice if you want
 one: generate a new private key on the App's own settings page
 (GitHub allows multiple active keys simultaneously, so the old one
 keeps working during the swap), `put-secret-value` the new one here,
-apply, confirm a runner re-registers, then delete the old key from the
-App's settings page. `app_id` never needs to change on its own — a new
+apply, confirm a job still gets a runner, then delete the old key from
+the App's settings page. `app_id` never needs to change on its own — a new
 key is not a new App.
 
 ## Automated rotation
