@@ -28,6 +28,8 @@ not migrations.
   Authelia OIDC client secret (created, not migrated)
 - [k3s-apps/paperless](k3s-apps/paperless.md) — Paperless-ngx's own
   Authelia OIDC client secret (created, not migrated)
+- [k3s-apps/vaultwarden](k3s-apps/vaultwarden.md) — Vaultwarden's own
+  Authelia OIDC client secret (created, not migrated)
 - [k3s-apps/stalwart](k3s-apps/stalwart.md) — the Stalwart
   management-API token [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' Terraform provider
   authenticates with (created, not migrated)
