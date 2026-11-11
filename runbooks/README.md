@@ -68,6 +68,10 @@ not migrations.
 - [fritzbox/terraform](fritzbox/terraform.md) — the dedicated FRITZ!Box
   user `KandlerLi/fritzbox`'s Terraform logs in as (TR-064)
 
+Not a container: [outside-secrets-manager](outside-secrets-manager.md)
+catalogs the credentials kept in `pass` or on paper instead, with
+their rotation triggers.
+
 Every container has `lifecycle { prevent_destroy = true }` — these are
 foundational, load-bearing resources for every service migrated off
 SOPS, not something a stray `terraform apply` should ever remove.
