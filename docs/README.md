@@ -286,6 +286,11 @@ the coordinated two-secret procedure and cross-references the matching
 half in `runbooks/home-infra/authelia.md`, so one link per entry
 is still enough even though those pairs span two secret groups.
 
+Credentials kept outside Secrets Manager (in `pass` or on paper) are
+cataloged in [`runbooks/outside-secrets-manager.md`](../runbooks/outside-secrets-manager.md).
+The scheduled ones are in the same file with the id prefix `pass:`,
+next to `drill:offline-recovery` for the yearly offline restore drill.
+
 `scripts/check-secret-rotation.sh` does the check and sends the mail. It
 needs an AWS session with `ses:SendEmail` on the `jkandler.de` identity
 and `jq` on PATH; the workflow provides both (its OIDC role, and an
