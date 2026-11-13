@@ -33,6 +33,8 @@ not migrations.
 - [k3s-apps/stalwart](k3s-apps/stalwart.md) — the Stalwart
   management-API token [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' Terraform provider
   authenticates with (created, not migrated)
+- [home-infra/argocd](home-infra/argocd.md) — Argo CD's own
+  Authelia OIDC client secret (created, not migrated)
 - [home-infra/grafana](home-infra/grafana.md) — Grafana's Authelia
   OIDC client secret (its dead admin password was removed in the same
   pass)
