@@ -6,8 +6,11 @@
 container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-11 — container only, no value.
 
-**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/open_webui`, read via
-`secrets.tf`.
+**Consumed by**: the External Secrets Operator in `apps` (role
+`k3s-eso-apps`, ADR 0032) through [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
+`argocd/open-webui/externalsecret.yaml`, hourly or at once with
+`kubectl -n apps annotate externalsecret open-webui-oidc-client-secret force-sync=$(date +%s) --overwrite`;
+Reloader then restarts Open WebUI.
 
 ## Keys
 
@@ -28,8 +31,9 @@ k3s-apps/scripts/rotate-oidc-client-secret.sh openwebui
 ```
 
 It prompts silently for each value, rejects an obviously-swapped pair,
-writes both secrets, and runs `terraform apply` (rolls Authelia and
-Open WebUI together, in sync). Verify for real afterward -- it can't be
+writes both secrets, and runs `terraform apply`, which now rolls only
+Authelia's side; then force-sync the ExternalSecret (above) so Open
+WebUI follows at once. Verify for real afterward -- it can't be
 checked automatically, it's a browser OIDC login flow: sign out, then
 "Sign in with Authelia" must reach a real login/consent screen and land
 back in Open WebUI authenticated.
