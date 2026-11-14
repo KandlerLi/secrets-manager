@@ -6,9 +6,10 @@
 container -- a single `for_each` resource, not a per-secret module. A genuinely new secret, not a
 migration.
 
-**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' Stalwart Terraform provider
-(`secrets.tf` -> `local.k3s_apps_stalwart`), which manages Stalwart's
-settings as code.
+**Consumed by**: [`stalwart-config`](https://github.com/KandlerLi/stalwart-config)'s Stalwart Terraform provider
+(`secrets.tf` -> `local.stalwart`), which manages Stalwart's settings as
+code; its CI roles may read this group and nothing else in Secrets
+Manager. (Until k3s-apps' CI cleanup, k3s-apps still reads the token too.)
 
 ## Keys
 
@@ -26,26 +27,52 @@ credential for the mail server.
 **Bootstrapping / rotating** -- mint the key through the API, then merge
 it into this secret without printing it:
 
-```bash
+```zsh
 # with a port-forward to Stalwart (svc/stalwart-internal 18083:8080)
 apikey=$(pass show mail/admin/api)
 resp=$(curl -s -X POST http://127.0.0.1:18083/jmap/ \
   -H "Authorization: Bearer $apikey" -H 'Content-Type: application/json' \
   -d '{"using":["urn:ietf:params:jmap:core","urn:stalwart:jmap"],"methodCalls":[["x:ApiKey/set",{"create":{"new1":{"allowedIps":{},"description":"terraform","permissions":{"@type":"Inherit"}}}},"c1"]]}')
-printf '%s' "$resp" | python3 -c 'import sys,json
+token=$(printf '%s' "$resp" | python3 -c 'import sys,json
 d=json.load(sys.stdin); r=d["methodResponses"][0][1]; c=r.get("created",{}).get("new1")
 if not c: sys.stderr.write("FAILED: %s\n" % (r.get("notCreated") or d)); sys.exit(1)
 sys.stderr.write("created id: %s\n" % c.get("id"))
-print(json.dumps({"stalwart_api_token": c["secret"]}))' > /tmp/stalwart-token.json
-aws secretsmanager put-secret-value --secret-id k3s-apps/stalwart \
-  --region eu-central-1 --secret-string file:///tmp/stalwart-token.json
-rm /tmp/stalwart-token.json; unset apikey resp
+print(c["secret"])')
+umask 077; T=$(mktemp)
+aws secretsmanager get-secret-value --region eu-central-1 --secret-id k3s-apps/stalwart \
+  --query SecretString --output text | jq --arg v "$token" '.stalwart_api_token = $v' > "$T"
+aws secretsmanager put-secret-value --region eu-central-1 --secret-id k3s-apps/stalwart \
+  --secret-string "file://$T"
+rm -f "$T"; unset apikey resp token
 ```
 
-To **rotate**: repeat (a new key), apply, confirm Terraform still
+The merge keeps `ses_smtp_username` (below); never write this group
+from scratch.
+
+To **rotate**: repeat (a new key), confirm stalwart-config's CI still
 plans cleanly, then destroy the old key with `x:ApiKey/set` and
 `{"destroy":["<old id>"]}`. Stalwart shows a key's secret exactly once,
 at creation.
+
+### `ses_smtp_username`
+The SES SMTP username of Stalwart's relay route (`stalwart_mta_route_relay`),
+a copy of `home-infra/monitoring`'s `monitoring_ses_smtp_username`, so
+stalwart-config's roles don't need that group, which also holds the SES
+password. Not secret on its own, but kept here with the credential it
+belongs to. **Rotate it together with the SES credential**: after
+`home-infra/monitoring` changes, copy it over again. Copy, without
+printing it:
+
+```zsh
+umask 077; T=$(mktemp)
+U=$(aws secretsmanager get-secret-value --region eu-central-1 --secret-id home-infra/monitoring \
+  --query SecretString --output text | jq -r .monitoring_ses_smtp_username)
+aws secretsmanager get-secret-value --region eu-central-1 --secret-id k3s-apps/stalwart \
+  --query SecretString --output text | jq --arg v "$U" '.ses_smtp_username = $v' > "$T"
+aws secretsmanager put-secret-value --region eu-central-1 --secret-id k3s-apps/stalwart \
+  --secret-string "file://$T"
+rm -f "$T"; unset U
+```
 
 ## Automated rotation
 
