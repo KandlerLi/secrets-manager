@@ -9,8 +9,8 @@ value. **Not a migration**: this key was split out of
 campaign has restructured an already-migrated secret's contents rather
 than just moving an existing container between Terraform roots.
 
-**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/home_agent` (Terraform, via
-`secrets.tf`) and sankey-export (since 2026-11-14 through ESO,
+**Consumed by**: home_agent and sankey-export, since 2026-11-14 both
+through ESO in `apps` ([`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `argocd/home-agent/` and
 `argocd/sankey-export/externalsecret.yaml`) — genuinely two
 independent consumers of the exact same credential, not a shared
 container for convenience. Splitting it out made that explicit in the
@@ -36,9 +36,8 @@ GitHub account.
 
 **Rotation**: generate a new fine-grained PAT in GitHub's own PAT
 settings with the same `read:packages` scope, `put-secret-value`, then
-`terraform apply` in [`k3s-apps`](https://github.com/KandlerLi/k3s-apps) for home_agent's pull Secret, and
-`kubectl -n apps annotate externalsecret sankey-export-ghcr-pull-secret force-sync=$(date +%s) --overwrite`
-for sankey-export's (or wait up to an hour). Verify for real before considering it done: a
+force-sync both pull Secrets (or wait up to an hour):
+`kubectl -n apps annotate externalsecret ghcr-pull-secret sankey-export-ghcr-pull-secret force-sync=$(date +%s) --overwrite`. Verify for real before considering it done: a
 clean apply only proves the Kubernetes Secret objects updated, not
 that the new token can actually authenticate against GHCR. A direct
 check against the registry's own API (no `docker`/`skopeo` needed):
