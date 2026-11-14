@@ -7,8 +7,9 @@ container -- a single `for_each` resource, not a per-secret module. Migrated her
 2026-09-10, the pilot for the campaign in that repo's own README —
 container only, no value.
 
-**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/sankey_export`, read via
-`secrets.tf`. This module's own image pull also depends on a second,
+**Consumed by**: the External Secrets Operator in `apps` (role
+`k3s-eso-apps`, ADR 0032) through [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
+`argocd/sankey-export/externalsecret.yaml`, hourly or on a forced sync. The CronJob's own image pull also depends on a second,
 separate secret — `k3s-apps/ghcr-pull-token`, shared with
 `modules/home_agent` — not documented here since this file only covers
 what's actually in this group's own JSON.
@@ -33,9 +34,8 @@ docker exec nextcloud-aio-nextcloud php occ user:auth-tokens:add \
 scripts/rotate-sankey-export-app-password.sh 'the-printed-token'
 ```
 
-The script merges the token into this secret (`put-secret-value`), runs
-`terraform apply` to roll `kubernetes_secret_v1.sankey_export_app_password`,
-waits for the next CronJob run to prove the new token works, and prints
+The script merges the token into this secret (`put-secret-value`), forces
+ESO to sync `sankey-export-app-password` at once, waits for the next CronJob run to prove the new token works, and prints
 the `occ user:auth-tokens:delete` command for the old token. It never
 touches the old token — both stay valid until you delete the old one,
 so there's no blackout window.
@@ -61,8 +61,8 @@ homeserver, or the account's login password:
 
 An AWS-native rotation Lambda is doubly blocked: no route to the
 private k3s network at all, *and* nothing propagates a `put-secret-value`
-into the live Kubernetes Secret without a `terraform apply` a Lambda
-can't run. See
+into the live Kubernetes Secret faster than ESO's hourly refresh
+without the script's forced sync. See
 [`home-infra-docs/docs/runbooks/rotate-secrets.md`](https://github.com/KandlerLi/home-infra-docs/blob/main/docs/runbooks/rotate-secrets.md)'s own reality-check
 section.
 
