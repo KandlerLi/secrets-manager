@@ -5,8 +5,11 @@
 root `main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)). A genuinely new secret, not a
 migration (ADR 0028 and its SSO amendment in [`home-infra-docs`](https://github.com/KandlerLi/home-infra-docs)).
 
-**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/vaultwarden`, read via
-`secrets.tf`.
+**Consumed by**: the External Secrets Operator in `apps` (role
+`k3s-eso-apps`, ADR 0032) through [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
+`argocd/vaultwarden/externalsecret.yaml`, hourly or at once with
+`kubectl -n apps annotate externalsecret vaultwarden-sso force-sync=$(date +%s) --overwrite`;
+Reloader then restarts Vaultwarden.
 
 Vaultwarden's own key files (`rsa_key*`) are deliberately **not** here:
 Vaultwarden generates them on its volume, and nobody ever types them.
@@ -22,7 +25,8 @@ Never rotate this alone.
 **Rotation**: generate a fresh plaintext + hash together (see
 `home-infra/authelia.md` for the exact command), then
 `[`k3s-apps/scripts/rotate-oidc-client-secret.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-oidc-client-secret.sh) vaultwarden`, which
-writes both secrets and runs `terraform apply`. Verify for real
+writes both secrets and runs `terraform apply`, which now rolls only
+Authelia's side; then force-sync `vaultwarden-sso` (above). Verify for real
 afterward: log out of the web vault, then "Use single sign-on" must
 pass through Authelia and end at the master-password prompt.
 
