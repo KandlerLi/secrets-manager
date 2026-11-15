@@ -3,7 +3,7 @@
   "secrets": [
     {
       "id": "k3s-apps/ghcr-pull-token",
-      "description": "Category A. GHCR pull token (classic PAT) shared by KandlerLi/k3s-apps' modules/home_agent and modules/sankey_export -- GitHub enforces a hard 90-day expiry on this token itself, not a self-imposed policy (see KandlerLi/home-infra-docs' own decisions.md entry on why this has to stay a classic PAT).",
+      "description": "Category A. GHCR pull token (classic PAT) shared by home_agent's and sankey-export's pull Secrets (through ESO, KandlerLi/k3s-apps) and Renovate -- GitHub enforces a hard 90-day expiry on this token itself, not a self-imposed policy (see KandlerLi/home-infra-docs' own decisions.md entry on why this has to stay a classic PAT).",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/k3s-apps/ghcr-pull-token.md",
       "last_rotated": "2026-09-17",
       "rotate_every_days": 90
@@ -157,7 +157,7 @@
     },
     {
       "id": "k3s-apps/stalwart:stalwart_api_token",
-      "description": "Admin API key on Stalwart minted for Terraform (KandlerLi/k3s-apps' Stalwart provider). Full admin permissions; no platform-enforced expiry -- self-imposed hygiene interval. Rotate by minting a new key, seeding this secret, then destroying the old key.",
+      "description": "Admin API key on Stalwart minted for Terraform (KandlerLi/stalwart-config's Stalwart provider). Full admin permissions; no platform-enforced expiry -- self-imposed hygiene interval. Rotate by minting a new key, seeding this secret, then destroying the old key.",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/k3s-apps/stalwart.md",
       "last_rotated": "2026-09-21",
       "rotate_every_days": 180
