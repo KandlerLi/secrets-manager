@@ -9,9 +9,10 @@ container -- a single `for_each` resource, not a per-secret module. Migrated her
 **Consumed by**: Alertmanager (SES creds templated into
 `alertmanager.yml`; since 2026-11-15 through ESO in `monitoring`,
 [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `argocd/alertmanager/externalsecret.yaml`, Reloader restarts it)
-and, via `secrets.tf`, `modules/authelia` (same SES identity, reused for
-Authelia's own password-reset emails rather than provisioning a second
-one — `checksum/config`) and `modules/stalwart` (its SES relay). [`home-infra`](https://github.com/KandlerLi/home-infra)'s own
+and Stalwart's SES relay (`stalwart-ses-smtp`, also through ESO, in
+`apps`, since 2026-11-15), and, via `secrets.tf`, `modules/authelia`
+(same SES identity, reused for Authelia's own password-reset emails
+rather than provisioning a second one — `checksum/config`). [`home-infra`](https://github.com/KandlerLi/home-infra)'s own
 Ansible (`ansible/playbooks/site.yml`'s `pre_tasks`) also reads all
 three keys directly, but — confirmed live 2026-09-11 while rotating
 this group for real — only to `ansible.builtin.assert` they're
@@ -49,7 +50,8 @@ python3 scripts/derive_smtp_password.py "$(terraform output -raw smtp_secret_acc
 smtp_username`) and derived password into this group, `terraform
 apply` in [`k3s-apps`](https://github.com/KandlerLi/k3s-apps) for the Terraform-fed consumers, and
 `kubectl -n monitoring annotate externalsecret alertmanager-config force-sync=$(date +%s) --overwrite`
-for Alertmanager (or wait up to an hour); each restarts on its own
+for Alertmanager, likewise `-n apps ... stalwart-ses-smtp` for Stalwart
+(or wait up to an hour); each restarts on its own
 once its rendered config changes. The old key is already gone from IAM by this point,
 same zero-credential-less-window guarantee as the ACME key. Verify for
 real: a genuine SMTP AUTH + send against
