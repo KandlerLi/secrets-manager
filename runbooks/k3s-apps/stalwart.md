@@ -9,7 +9,7 @@ migration.
 **Consumed by**: [`stalwart-config`](https://github.com/KandlerLi/stalwart-config)'s Stalwart Terraform provider
 (`secrets.tf` -> `local.stalwart`), which manages Stalwart's settings as
 code; its CI roles may read this group and nothing else in Secrets
-Manager. (Until k3s-apps' CI cleanup, k3s-apps still reads the token too.)
+Manager. (k3s-apps read the token too until its Terraform went, 2026-11-15.)
 
 ## Keys
 
