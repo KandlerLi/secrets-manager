@@ -9,12 +9,14 @@ value; the value is set out-of-band via `aws secretsmanager
 put-secret-value` (never `aws_secretsmanager_secret_version` in
 Terraform).
 
-**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/authelia`, read via
-`secrets.tf`'s `data "aws_secretsmanager_secret_version"` +
-`jsondecode()` at every `terraform plan`/`apply` (both the apply and
-plan CI roles need `GetSecretValue` for this, unlike [`dyndns`](https://github.com/KandlerLi/dyndns)'s own
-metadata-only plan role — `jsondecode()` needs the real value to
-compute a diff).
+**Consumed by**: the External Secrets Operator in `auth` (role
+`k3s-eso-auth`, ADR 0032), since 2026-11-15, through [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
+`argocd/authelia/externalsecret.yaml`, which renders `configuration.yml`
+and `users_database.yml` from this group (and the SES login from
+`home-infra/monitoring`), hourly or at once with
+`kubectl -n auth annotate externalsecret authelia-config force-sync=$(date +%s) --overwrite`
+(likewise `authelia-users` for the two password hashes); Reloader then
+restarts Authelia.
 
 Authelia's own internal crypto material plus the hash half of each
 OIDC client secret pair — mostly not things a human types or
@@ -45,19 +47,17 @@ rotates `authelia_session_secret`, `authelia_storage_encryption_key` and
 `authelia_oidc_issuer_private_key` in one go: fresh backup job, new
 values generated in memory, written to this secret **before**
 `change-key` re-encrypts the live database, a check against the new
-key, then `terraform apply` to roll the Pod. Values never appear in
+key, then a forced ESO sync, after which Reloader rolls the Pod. Values never appear in
 argv, files or output. Blast radius: everyone logged out, every OIDC
 client session ends.
 
 Before running it: `aws login` as an identity that can write this
-secret **and** read `k3s-apps`' Terraform state, plus
-`kubectl -n apps port-forward svc/stalwart-internal 18083:8080` (the local
-apply needs the Stalwart provider). On 2026-10-25 the first run died
-at the apply with a state-access 403, after `change-key` had already
-run: the database and this secret already held the new key, the Pod
-still the old one. That state is finished with `terraform apply`
-alone; never roll this secret back and never re-run the script then,
-since it would generate a key the database doesn't have.
+secret. If the script stops after `change-key` (the database and this
+secret already hold the new key, the Pod still the old one), finish
+with the forced sync above alone; never roll this secret back and never
+re-run the script then, since it would generate a key the database
+doesn't have. (On 2026-10-25 the first run died exactly there, at what
+was then a `terraform apply`.)
 
 ### `authelia_reset_password_jwt_secret`
 Signs the password-reset email's JWT link (config's
@@ -114,13 +114,12 @@ grafana` (or `openwebui`, or `nextcloud`) — it writes both secrets and
 rejects an obviously-swapped pair (a pbkdf2 hash always starts with
 `$`, the random plaintext never does).
 
-**Grafana/Open WebUI**: the script then runs `terraform apply` (rolls
-Authelia and the client Deployment together, in sync) and stops there
-— both live in [`k3s-apps`](https://github.com/KandlerLi/k3s-apps).
+**Grafana/Open WebUI** (and Bulwark, Paperless, Vaultwarden): the script
+then forces ESO to sync Authelia's config and the client's Secret, so
+Reloader restarts both together, and stops there.
 
 **Nextcloud** (script support added 2026-09-11 — it used to be
-manual): the script runs the same `terraform apply` for Authelia's own
-side, then also re-runs [`home-infra`](https://github.com/KandlerLi/home-infra)'s `site.yml`
+manual): the script forces the same sync for Authelia's own side, then also re-runs [`home-infra`](https://github.com/KandlerLi/home-infra)'s `site.yml`
 (`--ask-become-pass`, so you run this one yourself) so the new
 plaintext reaches Nextcloud's own `occ user_oidc:provider` config —
 confirmed live that step is a real upsert, not a formality (unlike
