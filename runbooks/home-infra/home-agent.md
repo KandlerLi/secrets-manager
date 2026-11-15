@@ -6,8 +6,14 @@
 container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-11 — container only, no value.
 
-**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/home_agent`, read via
-`secrets.tf`. `home_agent_ghcr_token` used to live here too, reused
+**Consumed by**: the External Secrets Operator in `apps` (role
+`k3s-eso-apps`, ADR 0032) through [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
+`argocd/home-agent/externalsecret.yaml`: one ExternalSecret per key
+(`home-agent-anthropic-api-key`, `home-agent-openai-api-key`,
+`nextcloud-tools-app-password`). The "forced sync" in each rotation
+below is:
+`kubectl -n apps annotate externalsecret <name> force-sync=$(date +%s) --overwrite`
+(or wait up to an hour); Reloader then restarts home_agent. `home_agent_ghcr_token` used to live here too, reused
 directly by `modules/sankey_export` — split out into its own dedicated
 `k3s-apps/ghcr-pull-token` secret 2026-09-12, since it was never really
 "home-agent's own" credential (a single, account-scoped GHCR pull
@@ -21,14 +27,14 @@ Anthropic API key for `home_agent`'s own chat/tool-use calls
 `home_agent_openai_api_key` for this purpose 2026-09-18; Whisper
 speech-to-text stayed on OpenAI (see below), so both keys are live at
 once. Generate a new key in the Anthropic Console, `put-secret-value`,
-`terraform apply` ([`k3s-apps`](https://github.com/KandlerLi/k3s-apps)), then revoke the old key once the
+a forced sync (above), then revoke the old key once the
 new Deployment is confirmed healthy.
 
 ### `home_agent_openai_api_key`
 OpenAI API key for `home_agent`'s Whisper speech-to-text relay only
 (`audio.py`) — no longer used for chat/completions as of 2026-09-18,
 see `home_agent_anthropic_api_key` above. Generate a new key in the
-OpenAI dashboard, `put-secret-value`, `terraform apply`, then revoke
+OpenAI dashboard, `put-secret-value`, a forced sync, then revoke
 the old key once the new Deployment is confirmed healthy.
 
 ### `nextcloud_tools_app_password`
@@ -46,7 +52,7 @@ k3s-native (commit `018c5ff`). Manual flow:
 docker exec nextcloud-aio-nextcloud php occ user:auth-tokens:add \
   --name "<new token name>" -- home-agent
 ```
-capture the printed token, `put-secret-value`, `terraform apply`.
+capture the printed token, `put-secret-value`, a forced sync.
 Revoke the superseded token only after confirming the new one works
 (`occ user:auth-tokens:list -- home-agent`, then
 `occ user:auth-tokens:delete` on the old one by ID) — both tokens stay
