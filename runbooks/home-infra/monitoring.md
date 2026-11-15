@@ -10,9 +10,9 @@ container -- a single `for_each` resource, not a per-secret module. Migrated her
 `alertmanager.yml`; since 2026-11-15 through ESO in `monitoring`,
 [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `argocd/alertmanager/externalsecret.yaml`, Reloader restarts it)
 and Stalwart's SES relay (`stalwart-ses-smtp`, also through ESO, in
-`apps`, since 2026-11-15), and, via `secrets.tf`, `modules/authelia`
-(same SES identity, reused for Authelia's own password-reset emails
-rather than provisioning a second one — `checksum/config`). [`home-infra`](https://github.com/KandlerLi/home-infra)'s own
+`apps`) and Authelia's notifier (same SES identity, reused for
+password-reset emails rather than provisioning a second one;
+`authelia-config` in `auth`), all three through ESO since 2026-11-15. [`home-infra`](https://github.com/KandlerLi/home-infra)'s own
 Ansible (`ansible/playbooks/site.yml`'s `pre_tasks`) also reads all
 three keys directly, but — confirmed live 2026-09-11 while rotating
 this group for real — only to `ansible.builtin.assert` they're
@@ -47,11 +47,10 @@ python3 scripts/derive_smtp_password.py "$(terraform output -raw smtp_secret_acc
 ```
 
 `put-secret-value` the new username (`terraform output -raw
-smtp_username`) and derived password into this group, `terraform
-apply` in [`k3s-apps`](https://github.com/KandlerLi/k3s-apps) for the Terraform-fed consumers, and
-`kubectl -n monitoring annotate externalsecret alertmanager-config force-sync=$(date +%s) --overwrite`
-for Alertmanager, likewise `-n apps ... stalwart-ses-smtp` for Stalwart
-(or wait up to an hour); each restarts on its own
+smtp_username`) and derived password into this group, then force ESO to
+sync all three consumers (or wait up to an hour):
+`kubectl -n monitoring annotate externalsecret alertmanager-config force-sync=$(date +%s) --overwrite`,
+likewise `-n apps ... stalwart-ses-smtp` and `-n auth ... authelia-config`; each restarts on its own
 once its rendered config changes. The old key is already gone from IAM by this point,
 same zero-credential-less-window guarantee as the ACME key. Verify for
 real: a genuine SMTP AUTH + send against
