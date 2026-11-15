@@ -6,8 +6,13 @@
 container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-11 — container only, no value.
 
-**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/ingress`, read via
-`secrets.tf`.
+**Consumed by**: Traefik, through the External Secrets Operator in
+`apps` (role `k3s-eso-apps`, ADR 0032, [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
+`argocd/ingress/templates/externalsecret.yaml`); Reloader restarts it
+when the Secret changes. Wherever a rotation below says `terraform apply`
+in `k3s-apps`, force the sync instead:
+`kubectl -n apps annotate externalsecret ingress-acme-dns01-credentials force-sync=$(date +%s) --overwrite`
+(or wait up to an hour).
 
 ## Keys
 
