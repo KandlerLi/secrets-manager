@@ -5,17 +5,17 @@
 root `main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)). A genuinely new secret, not a
 migration (ADR 0023).
 
-**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/paperless`, read via
-`secrets.tf`.
-
-Paperless's `PAPERLESS_SECRET_KEY` and its PostgreSQL password are
-deliberately **not** here: nobody ever types either, so they are
-`random_password` resources inside `modules/paperless` instead.
+**Consumed by**: the External Secrets Operator in `apps` (role
+`k3s-eso-apps`, ADR 0032) through [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
+`argocd/paperless/externalsecret.yaml`, which builds `paperless-env` and
+`paperless-postgres`, hourly or at once with
+`kubectl -n apps annotate externalsecret paperless-env paperless-postgres force-sync=$(date +%s) --overwrite`;
+Reloader then restarts Paperless.
 
 ## Keys
 
 ### `authelia_oidc_paperless_client_secret`
-The only key in this group. Plaintext half of Paperless-ngx's OIDC
+Plaintext half of Paperless-ngx's OIDC
 client secret pair -- Authelia holds the matching hash
 (`home-infra/authelia`'s `authelia_oidc_paperless_client_secret_hash`).
 Never rotate this alone.
@@ -23,9 +23,26 @@ Never rotate this alone.
 **Rotation**: generate a fresh plaintext + hash together (see
 `home-infra/authelia.md` for the exact command), then
 `[`k3s-apps/scripts/rotate-oidc-client-secret.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-oidc-client-secret.sh) paperless`, which
-writes both secrets and runs `terraform apply`. Verify for real
+writes both secrets and runs `terraform apply`, which now rolls only
+Authelia's side; then force-sync `paperless-env` (above). Verify for real
 afterward: sign out, "Sign in with Authelia" must land back in Paperless
 authenticated.
+
+### `paperless_secret_key`
+Django's `PAPERLESS_SECRET_KEY` (sessions, signed tokens). Until
+2026-11-15 a `random_password` in `k3s-apps`' Terraform state; copied
+here unchanged. **Rotation**: a new 64-character value, merged into the
+JSON, then force-sync; every Paperless session ends.
+
+### `paperless_postgres_password`
+PostgreSQL password of the `paperless` role, used by both the database
+sidecar (`POSTGRES_PASSWORD`, only read on first initialisation) and
+Paperless (`PAPERLESS_DBPASS`). Until 2026-11-15 a `random_password` in
+`k3s-apps`' Terraform state; copied here unchanged. **Rotation is not a
+Secrets Manager write alone**: the live database keeps the old password
+until `ALTER ROLE paperless PASSWORD '…'` runs inside the database
+sidecar; change it there first, then write the same value here and
+force-sync, so Paperless reconnects with it.
 
 ## Bootstrapping the first value
 
