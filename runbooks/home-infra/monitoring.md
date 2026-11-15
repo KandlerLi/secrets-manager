@@ -6,11 +6,12 @@
 container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-11 — container only, no value.
 
-**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/alertmanager` (SES creds,
-templated into `alertmanager.yml`, `checksum/config` on the Deployment)
-and `modules/authelia` (same SES identity, reused for Authelia's own
-password-reset emails rather than provisioning a second one — also
-`checksum/config`), both via `secrets.tf`. [`home-infra`](https://github.com/KandlerLi/home-infra)'s own
+**Consumed by**: Alertmanager (SES creds templated into
+`alertmanager.yml`; since 2026-11-15 through ESO in `monitoring`,
+[`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `argocd/alertmanager/externalsecret.yaml`, Reloader restarts it)
+and, via `secrets.tf`, `modules/authelia` (same SES identity, reused for
+Authelia's own password-reset emails rather than provisioning a second
+one — `checksum/config`) and `modules/stalwart` (its SES relay). [`home-infra`](https://github.com/KandlerLi/home-infra)'s own
 Ansible (`ansible/playbooks/site.yml`'s `pre_tasks`) also reads all
 three keys directly, but — confirmed live 2026-09-11 while rotating
 this group for real — only to `ansible.builtin.assert` they're
@@ -46,10 +47,10 @@ python3 scripts/derive_smtp_password.py "$(terraform output -raw smtp_secret_acc
 
 `put-secret-value` the new username (`terraform output -raw
 smtp_username`) and derived password into this group, `terraform
-apply` in [`k3s-apps`](https://github.com/KandlerLi/k3s-apps) — this rolls *both* Alertmanager and
-Authelia (their `checksum/config` annotations restart each Deployment
-automatically once its rendered config's hash changes; no manual
-restart needed). The old key is already gone from IAM by this point,
+apply` in [`k3s-apps`](https://github.com/KandlerLi/k3s-apps) for the Terraform-fed consumers, and
+`kubectl -n monitoring annotate externalsecret alertmanager-config force-sync=$(date +%s) --overwrite`
+for Alertmanager (or wait up to an hour); each restarts on its own
+once its rendered config changes. The old key is already gone from IAM by this point,
 same zero-credential-less-window guarantee as the ACME key. Verify for
 real: a genuine SMTP AUTH + send against
 `email-smtp.eu-central-1.amazonaws.com:587` with the new credentials
