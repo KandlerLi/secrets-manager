@@ -7,8 +7,10 @@ container -- a single `for_each` resource, not a per-secret module. Migrated her
 2026-09-12 — container only, no value.
 
 **Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/blocky` (the Postgres
-sidecar and Blocky's own `config.yml`) and `modules/grafana` (its own
-Postgres datasource config), both via `secrets.tf`.
+sidecar and Blocky's own `config.yml`, via `secrets.tf`) and Grafana's
+Postgres datasource (since 2026-11-15 through ESO in `monitoring`,
+`argocd/grafana/externalsecret.yaml`; after a rotation it follows within
+an hour, or force-sync `grafana-datasources`).
 
 ## Keys
 
