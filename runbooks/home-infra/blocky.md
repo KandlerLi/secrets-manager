@@ -6,46 +6,44 @@
 container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-12 — container only, no value.
 
-**Consumed by**: [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `modules/blocky` (the Postgres
-sidecar and Blocky's own `config.yml`, via `secrets.tf`) and Grafana's
-Postgres datasource (since 2026-11-15 through ESO in `monitoring`,
-`argocd/grafana/externalsecret.yaml`; after a rotation it follows within
-an hour, or force-sync `grafana-datasources`).
+**Consumed by**: the External Secrets Operator, since 2026-11-15
+(ADR 0032): in `apps` for Blocky ([`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
+`argocd/blocky/externalsecret.yaml`: `config.yml`'s query-log URL, the
+Postgres sidecar's credentials and the exporter's DSN) and in
+`monitoring` for Grafana's Postgres datasource
+(`argocd/grafana/externalsecret.yaml`).
 
 ## Keys
 
 ### `blocky_postgres_password`
 Self-hosted, in-cluster Postgres password for Blocky's query-log
 database — **not** an AWS-managed database, so Secrets Manager's
-native RDS-style rotation templates don't apply. The database itself
-needs the change made directly; Secrets Manager having the new value
-isn't enough on its own:
+native RDS-style rotation templates don't apply, and writing a new
+value here alone breaks the logins: the database needs the change too.
+Inside the Pod, Blocky and the exporter connect over 127.0.0.1, which
+the sidecar trusts; the password guards only network access, i.e.
+Grafana's.
+
+**Rotation**: yearly or on suspicion, by hand from the laptop with
+`aws login` done:
 
 ```bash
-kubectl -n apps exec -it deploy/blocky -c postgres -- psql -U blocky -c \
-  "ALTER USER blocky WITH PASSWORD '<new-password>';"
+cd ~/projects/infra/k3s-apps && git checkout main && git pull && scripts/rotate-blocky-postgres-password.sh
 ```
 
-then `put-secret-value` and `terraform apply` (rolls both Blocky's and
-Grafana's Deployments — `checksum/config`/`checksum/postgres-credentials`
-on `modules/blocky` and `checksum/datasources` on `modules/grafana`,
-added 2026-09-12 specifically so this works; before that, neither Pod
-would have picked up the new value without a manual restart) — in
-that order, so the old value still works during the brief gap between
-the `ALTER USER` and the apply picking it up, rather than locking
-Blocky out.
+It ALTERs the role through `kubectl exec` into the Postgres sidecar
+(SQL on stdin, never in argv), writes the new value here (merged, never
+overwriting the group), forces ESO to sync the three Blocky Secrets and
+Grafana's datasource, and waits for Reloader's restarts. If the
+Secrets Manager write fails after the ALTER, rerun the script. Then
+check Grafana's Blocky query-log dashboard for fresh queries, and record
+the rotation with `scripts/manage-rotation-schedule.sh`.
 
-**Automated as of 2026-09-12**: `[`k3s-apps/scripts`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts)
-rotate-blocky-postgres-password.sh` (or the scheduled GitHub Actions
-workflow calling it) does exactly this sequence — see that script's
-own header comment for the full detail.
+## History
 
-## Automated rotation
-
-Built 2026-09-12 as a scheduled GitHub Actions workflow in
-[`k3s-apps`](https://github.com/KandlerLi/k3s-apps) (the in-cluster self-hosted runner already has
-`kubectl` and runs `terraform apply` there) — the one secret in this
-entire workspace where unattended rotation was judged genuinely safe:
-mechanically simple, low blast radius, no external system whose own
-UI needs separate reconfiguring (unlike every OIDC pair or
-`dyndns/fritzbox`'s router-side credential).
+From 2026-09-12 to 2026-11-15 a monthly GitHub Actions workflow in
+[`k3s-apps`](https://github.com/KandlerLi/k3s-apps) rotated this unattended on the in-cluster runner, the one
+unattended rotation in the workspace. It went with the move to ESO,
+since `k3s-apps`' CI loses its cluster and AWS access; it had also
+failed since the move to ARC runners (no AWS CLI in their image), so
+the last real rotation was 2026-10-27.
