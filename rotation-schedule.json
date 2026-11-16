@@ -3,7 +3,7 @@
   "secrets": [
     {
       "id": "k3s-apps/ghcr-pull-token",
-      "description": "Category A. GHCR pull token (classic PAT) shared by home_agent's and sankey-export's pull Secrets (through ESO, KandlerLi/k3s-apps) and Renovate -- GitHub enforces a hard 90-day expiry on this token itself, not a self-imposed policy (see KandlerLi/home-infra-docs' own decisions.md entry on why this has to stay a classic PAT).",
+      "description": "Category A. GHCR pull token (classic PAT) used by sankey-export's pull Secret (through ESO, KandlerLi/k3s-apps) and Renovate -- GitHub enforces a hard 90-day expiry on this token itself, not a self-imposed policy (see KandlerLi/home-infra-docs' own decisions.md entry on why this has to stay a classic PAT).",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/k3s-apps/ghcr-pull-token.md",
       "last_rotated": "2026-09-17",
       "rotate_every_days": 90
@@ -38,14 +38,14 @@
     },
     {
       "id": "home-infra/authelia:authelia_oidc_hmac_secret",
-      "description": "Category B. Rotating logs every live OIDC session out across Grafana, Open WebUI, and Nextcloud simultaneously.",
+      "description": "Category B. Rotating logs every live OIDC session out across Grafana and Nextcloud simultaneously.",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/authelia.md",
       "last_rotated": "2026-09-17",
       "rotate_every_days": 730
     },
     {
       "id": "home-infra/authelia:authelia_oidc_issuer_private_key",
-      "description": "Category B. Same blast radius as authelia_oidc_hmac_secret -- logs every live OIDC session out across Grafana, Open WebUI, and Nextcloud simultaneously.",
+      "description": "Category B. Same blast radius as authelia_oidc_hmac_secret -- logs every live OIDC session out across Grafana and Nextcloud simultaneously.",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/authelia.md",
       "last_rotated": "2026-10-25",
       "rotate_every_days": 730
@@ -65,13 +65,6 @@
       "rotate_every_days": 365
     },
     {
-      "id": "authelia-oidc:openwebui",
-      "description": "Category C. Same shape as authelia-oidc:grafana, for Open WebUI's own client secret pair (home-infra/authelia's hash half, home-infra/open-webui's plaintext half).",
-      "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/open-webui.md",
-      "last_rotated": "2026-09-17",
-      "rotate_every_days": 365
-    },
-    {
       "id": "authelia-oidc:nextcloud",
       "description": "Category C. Same shape as authelia-oidc:grafana, for Nextcloud's own client secret pair (home-infra/authelia's hash half, home-infra/nextcloud's plaintext half) -- the one pairing whose plaintext side applies through KandlerLi/home-infra's Ansible, not Terraform.",
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/nextcloud.md",
@@ -84,27 +77,6 @@
       "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/github-runner.md",
       "last_rotated": "2026-09-16",
       "rotate_every_days": 365
-    },
-    {
-      "id": "home-infra/home-agent:home_agent_openai_api_key",
-      "description": "Category A. OpenAI API key for home_agent's Whisper speech-to-text relay only (chat/completions moved to Anthropic 2026-09-18, see home_agent_anthropic_api_key). No platform-enforced expiry.",
-      "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/home-agent.md",
-      "last_rotated": "2026-09-17",
-      "rotate_every_days": 180
-    },
-    {
-      "id": "home-infra/home-agent:home_agent_anthropic_api_key",
-      "description": "Category A. Anthropic API key for home_agent's own chat/tool-use calls (replaced OpenAI 2026-09-18, see home_agent_openai_api_key). No platform-enforced expiry.",
-      "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/home-agent.md",
-      "last_rotated": "2026-09-18",
-      "rotate_every_days": 180
-    },
-    {
-      "id": "home-infra/home-agent:nextcloud_tools_app_password",
-      "description": "Category E. Nextcloud app password for home_agent's own read-only Nextcloud integration (the dedicated home-agent bot account). Minting the replacement always needs occ on the homeserver.",
-      "runbook_url": "https://github.com/KandlerLi/secrets-manager/blob/main/runbooks/home-infra/home-agent.md",
-      "last_rotated": "2026-09-17",
-      "rotate_every_days": 180
     },
     {
       "id": "home-infra/ingress:k3s_ingress_acme_dns01_key",
