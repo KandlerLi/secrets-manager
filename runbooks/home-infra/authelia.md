@@ -83,7 +83,7 @@ Signing secret for Authelia's own OIDC provider (config's
 `identity_providers.oidc.hmac_secret`) — pure random noise. Generate
 with `authelia crypto rand --length 64 --charset alphanumeric`.
 **Rotation impact**: invalidates every live OIDC session across
-Grafana, Open WebUI, and Nextcloud at once (all three services' users
+Grafana and Nextcloud at once (both services' users
 get logged out and must re-authenticate through Authelia).
 
 ### `authelia_oidc_issuer_private_key`
@@ -93,10 +93,10 @@ with (config's `identity_providers.oidc.jwks`). Generate with
 as the HMAC secret above — invalidates every live OIDC session
 simultaneously.
 
-### `authelia_oidc_grafana_client_secret_hash`, `authelia_oidc_openwebui_client_secret_hash`, `authelia_oidc_nextcloud_client_secret_hash`
+### `authelia_oidc_grafana_client_secret_hash`, `authelia_oidc_nextcloud_client_secret_hash`
 pbkdf2-sha512 hash of each client's own OIDC client secret — only the
 hash lives here, the matching plaintext lives in that client's own
-Secrets Manager group (`home-infra/grafana`, `home-infra/open-webui`,
+Secrets Manager group (`home-infra/grafana`,
 `home-infra/nextcloud` respectively — see each of those files' own
 "Rotating this pair" note). **Rotating one half without the other
 breaks that client's SSO outright.** Generate hash + plaintext
@@ -110,11 +110,11 @@ This prints both the random plaintext and its pbkdf2 hash — keep both,
 they go to two different secrets.
 
 Feed both values to `[`k3s-apps/scripts/rotate-oidc-client-secret.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-oidc-client-secret.sh)
-grafana` (or `openwebui`, or `nextcloud`) — it writes both secrets and
+grafana` (or `nextcloud`) — it writes both secrets and
 rejects an obviously-swapped pair (a pbkdf2 hash always starts with
 `$`, the random plaintext never does).
 
-**Grafana/Open WebUI** (and Bulwark, Paperless, Vaultwarden): the script
+**Grafana** (and Bulwark, Paperless, Vaultwarden): the script
 then forces ESO to sync Authelia's config and the client's Secret, so
 Reloader restarts both together, and stops there.
 
@@ -126,7 +126,7 @@ confirmed live that step is a real upsert, not a formality (unlike
 `home-infra/monitoring`'s SES creds, which turned out to be
 assert-only in Ansible). Nextcloud AIO runs on the homeserver, not
 k3s, so there's no Terraform-side Deployment to roll for it the way
-Grafana/Open WebUI get.
+Grafana gets.
 
 ## Automated rotation
 

@@ -21,9 +21,8 @@ not migrations.
 - [k3s-apps/sankey-export](k3s-apps/sankey-export.md) — the
   sankey-export CronJob's Nextcloud app password
 - [k3s-apps/ghcr-pull-token](k3s-apps/ghcr-pull-token.md) — the
-  account-scoped GHCR pull token shared by `modules/home_agent` and
-  `modules/sankey_export`, split out of `home-infra/home-agent`
-  (created, not migrated)
+  account-scoped GHCR pull token for sankey-export's image (created,
+  not migrated)
 - [k3s-apps/bulwark](k3s-apps/bulwark.md) — Bulwark webmail's own
   Authelia OIDC client secret (created, not migrated)
 - [k3s-apps/paperless](k3s-apps/paperless.md) — Paperless-ngx's own
@@ -38,15 +37,10 @@ not migrations.
 - [home-infra/grafana](home-infra/grafana.md) — Grafana's Authelia
   OIDC client secret (its dead admin password was removed in the same
   pass)
-- [home-infra/open-webui](home-infra/open-webui.md) — Open WebUI's
-  OIDC client secret
 - [home-infra/authelia](home-infra/authelia.md) — Authelia's own
   session/storage/OIDC crypto material, plus one personal login
 - [home-infra/nextcloud](home-infra/nextcloud.md) — Nextcloud's OIDC
   client secret (Ansible-consumed, not Terraform)
-- [home-infra/home-agent](home-infra/home-agent.md) — home_agent's
-  Anthropic API key (chat), OpenAI API key (Whisper speech-to-text
-  only, since 2026-09-18), and its nextcloud_tools app password
 - [home-infra/ingress](home-infra/ingress.md) — the ACME DNS-01 IAM
   keypair (the dormant shared Basic Auth rollback credential was
   retired, not migrated)

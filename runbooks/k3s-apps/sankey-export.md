@@ -10,8 +10,7 @@ container only, no value.
 **Consumed by**: the External Secrets Operator in `apps` (role
 `k3s-eso-apps`, ADR 0032) through [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
 `argocd/sankey-export/externalsecret.yaml`, hourly or on a forced sync. The CronJob's own image pull also depends on a second,
-separate secret — `k3s-apps/ghcr-pull-token`, shared with
-`modules/home_agent` — not documented here since this file only covers
+separate secret — `k3s-apps/ghcr-pull-token` — not documented here since this file only covers
 what's actually in this group's own JSON.
 
 ## Keys
@@ -68,5 +67,4 @@ section.
 
 **So**: everything after the mint is automated
 (`scripts/rotate-sankey-export-app-password.sh`); the mint stays one
-manual `occ` line. Same practical ceiling as
-`home-infra/home-agent`'s own `nextcloud_tools_app_password`.
+manual `occ` line.

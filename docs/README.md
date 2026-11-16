@@ -186,8 +186,6 @@ Terraform drops the resource from state with no delete API call. Never write
 |---|---|---|
 | `k3s-apps/sankey-export` | **yes (2026-09-10, pilot)** | value also rotated end-to-end via [`k3s-apps/scripts/rotate-sankey-export-app-password.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-sankey-export-app-password.sh) |
 | `home-infra/grafana` | **yes (2026-09-10)** | `monitoring_grafana_admin_password` retired in the same pass (dead — Grafana native login disabled); only the OIDC client secret remains |
-| `home-infra/open-webui` | **yes (2026-09-11)** | |
-| `home-infra/home-agent` | **yes (2026-09-11)** | |
 | `home-infra/ingress` | **yes (2026-09-11)** | `shared_ingress_auth_password(_hash)` retired in the same pass, not migrated — see that group's README |
 | `home-infra/monitoring` | **yes (2026-09-11)** | dual consumer — Terraform (`k3s-apps`) and Ansible plan/lookup both verified clean |
 | `home-infra/nextcloud` | **yes (2026-09-11)** | Ansible-only consumer, verified via a direct lookup test |
@@ -197,8 +195,8 @@ Terraform drops the resource from state with no delete API call. Never write
 | `home-infra/authelia` | **yes (2026-09-12)** | last group — 9 keys, highest blast radius |
 
 `k3s-apps/ghcr-pull-token` isn't in this table — it's a genuinely new
-secret, not a migration (split out of `home-infra/home-agent`
-2026-09-12; see `runbooks/k3s-apps/ghcr-pull-token.md`).
+secret, not a migration (split out of the since-retired
+`home-infra/home-agent` 2026-09-12; see `runbooks/k3s-apps/ghcr-pull-token.md`).
 
 `dyndns/fritzbox` didn't come from `[`terraform-state`](https://github.com/KandlerLi/terraform-state)/
 secrets_manager.tf` at all — it was created directly in [`dyndns`](https://github.com/KandlerLi/dyndns)
@@ -280,8 +278,8 @@ file only ever reflects what's already true, it never drives rotation
 itself. Each entry carries its own `runbook_url` -- a direct link to
 its own `runbooks/<group>.md`, not one shared file -- so the
 reminder email points straight at the exact rotation procedure for
-that credential. The three `authelia-oidc:*` pairs link the client's
-own README (Grafana/Open WebUI/Nextcloud), which already documents
+that credential. The `authelia-oidc:*` pairs link the client's
+own README (e.g. Grafana/Nextcloud), which already documents
 the coordinated two-secret procedure and cross-references the matching
 half in `runbooks/home-infra/authelia.md`, so one link per entry
 is still enough even though those pairs span two secret groups.

@@ -23,7 +23,7 @@ the matching hash (`home-infra/authelia`'s
 `home-infra/authelia.md`'s own note for the exact command), then
 `[`k3s-apps/scripts/rotate-oidc-client-secret.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-oidc-client-secret.sh) nextcloud` (script
 support added 2026-09-11 — this used to be a manual procedure). Unlike
-Grafana/Open WebUI, the script's own `terraform apply` only rolls
+Grafana, the script's own `terraform apply` only rolls
 Authelia's side here — Nextcloud AIO runs on the homeserver, not k3s,
 so there's no Deployment for it there. The script additionally re-runs
 [`home-infra`](https://github.com/KandlerLi/home-infra)'s `site.yml` itself (`--ask-become-pass`, so it
@@ -38,4 +38,4 @@ assert-only in Ansible and need no re-run at all).
 Structurally resistant, same as every OIDC pair — and this one spans
 two different repos/tools (Terraform for Authelia, Ansible for
 Nextcloud) for a single logical rotation, making unattended automation
-even less appropriate than the Grafana/Open WebUI pairs.
+even less appropriate than the Grafana pair.
