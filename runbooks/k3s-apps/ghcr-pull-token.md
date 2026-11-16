@@ -13,6 +13,11 @@ than just moving an existing container between Terraform roots.
 ([`k3s-apps`](https://github.com/KandlerLi/k3s-apps)' `argocd/sankey-export/externalsecret.yaml`). Until
 2026-11-16 home_agent's image pull used it too; that app is retired.
 
+Since 2026-11-16 also read by [`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap) at apply time:
+the CI runners' registry cache (`registry-cache` in `ci`) pulls the
+private CI images from GHCR with it. That copy lives in a Kubernetes
+Secret, so it changes only with a `k3s-bootstrap` apply.
+
 Since 2026-10-30 also read by [`renovate`](https://github.com/KandlerLi/renovate)'s
 scheduled workflow (only the `token` key, masked), to look up new
 digests of the image (tracker #46). It reads the value at each run,
@@ -28,7 +33,10 @@ Authorizes pulling `ghcr.io/kandlerli/sankey-export` (private).
 **Rotation**: generate a new fine-grained PAT in GitHub's own PAT
 settings with the same `read:packages` scope, `put-secret-value`, then
 force-sync the pull Secret (or wait up to an hour):
-`kubectl -n apps annotate externalsecret sankey-export-ghcr-pull-secret force-sync=$(date +%s) --overwrite`. Verify for real before considering it done: a
+`kubectl -n apps annotate externalsecret sankey-export-ghcr-pull-secret force-sync=$(date +%s) --overwrite`.
+Then re-apply `k3s-bootstrap` (`scripts/roll-out.sh apply`) so the
+registry cache gets the new token; until then it keeps pulling with the
+old one, and fails once that is revoked. Verify for real before considering it done: a
 clean apply only proves the Kubernetes Secret objects updated, not
 that the new token can actually authenticate against GHCR. A direct
 check against the registry's own API (no `docker`/`skopeo` needed):
