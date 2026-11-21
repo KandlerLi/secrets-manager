@@ -30,6 +30,7 @@ locals {
 
     "k3s-apps/bulwark"         = "Bulwark webmail's own Authelia OIDC client secret (plaintext half of the pair)"
     "k3s-apps/ghcr-pull-token" = "Account-scoped GHCR pull token for sankey-export's image (and Renovate)"
+    "k3s-apps/nextcloud"       = "Nextcloud-on-k3s' own PostgreSQL password and initial admin password (ADR 0033)"
     "k3s-apps/paperless"       = "Paperless-ngx's own Authelia OIDC client secret (plaintext half of the pair)"
     "k3s-apps/sankey-export"   = "sankey_export CronJob's own Nextcloud app password"
     "k3s-apps/stalwart"        = "Stalwart management-API token (admin API key) used by KandlerLi/k3s-apps' Terraform provider"
