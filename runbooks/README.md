@@ -36,6 +36,8 @@ not migrations.
   authenticates with (created, not migrated)
 - [home-infra/argocd](home-infra/argocd.md) — Argo CD's own
   Authelia OIDC client secret (created, not migrated)
+- [home-infra/nextcloud-backup](home-infra/nextcloud-backup.md) — the
+  restic repository password for Nextcloud's files (created, not migrated)
 - [home-infra/grafana](home-infra/grafana.md) — Grafana's Authelia
   OIDC client secret (its dead admin password was removed in the same
   pass)
