@@ -11,6 +11,13 @@ container -- a single `for_each` resource, not a per-secret module. Migrated her
 `nextcloud_aio_oidc_enabled`), **not** Terraform — Nextcloud AIO runs
 on the homeserver itself, not in k3s, unlike every other OIDC client.
 
+Since ADR 0033 (Nextcloud moves to k3s) also read by the External
+Secrets Operator in `apps` (role `k3s-eso-apps`) through [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
+`argocd/nextcloud/externalsecret.yaml`: the k3s instance signs in with
+the same `nextcloud` client. Until the cutover a rotation must reach
+both, AIO through Ansible (below) and k3s by force-syncing
+`nextcloud-env`.
+
 ## Keys
 
 ### `authelia_oidc_nextcloud_client_secret`
