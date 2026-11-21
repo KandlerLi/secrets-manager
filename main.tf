@@ -30,6 +30,7 @@ locals {
     "home-infra/prometheus"       = "Tokens the homeserver's Prometheus and GitHub runner exporter read with (consumed by KandlerLi/home-infra's Ansible only)"
 
     "k3s-apps/bulwark"         = "Bulwark webmail's own Authelia OIDC client secret (plaintext half of the pair)"
+    "k3s-apps/eurooffice"      = "JWT and secure-link secrets of Euro-Office on k3s (ADR 0034)"
     "k3s-apps/ghcr-pull-token" = "Account-scoped GHCR pull token for sankey-export's image (and Renovate)"
     "k3s-apps/nextcloud"       = "Nextcloud-on-k3s' own PostgreSQL password and initial admin password (ADR 0033)"
     "k3s-apps/paperless"       = "Paperless-ngx's own Authelia OIDC client secret (plaintext half of the pair)"
