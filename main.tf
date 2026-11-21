@@ -25,7 +25,7 @@ locals {
     "home-infra/grafana"          = "Grafana's own Authelia OIDC client secret (plaintext half of the pair)"
     "home-infra/ingress"          = "The ACME DNS-01 Route53 IAM keypair (dyndns's own traefik-acme-dns01 user)"
     "home-infra/monitoring"       = "Alertmanager/Authelia's shared SES SMTP identity and the ntfy relay topic"
-    "home-infra/nextcloud"        = "Nextcloud's own Authelia OIDC client secret (consumed by KandlerLi/home-infra's Ansible only -- Nextcloud AIO stays on the homeserver, not k3s)"
+    "home-infra/nextcloud"        = "Nextcloud's own Authelia OIDC client secret (plaintext half of the pair; Nextcloud on k3s, ADR 0033)"
     "home-infra/nextcloud-backup" = "Password of the homeserver's restic repository for Nextcloud's files (ADR 0033; consumed by KandlerLi/home-infra's Ansible only)"
     "home-infra/prometheus"       = "Tokens the homeserver's Prometheus and GitHub runner exporter read with (consumed by KandlerLi/home-infra's Ansible only)"
 
