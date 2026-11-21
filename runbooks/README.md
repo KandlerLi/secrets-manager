@@ -25,6 +25,8 @@ not migrations.
   not migrated)
 - [k3s-apps/bulwark](k3s-apps/bulwark.md) — Bulwark webmail's own
   Authelia OIDC client secret (created, not migrated)
+- [k3s-apps/eurooffice](k3s-apps/eurooffice.md) — the JWT secret
+  between Nextcloud and Euro-Office (created, not migrated)
 - [k3s-apps/nextcloud](k3s-apps/nextcloud.md) — Nextcloud-on-k3s'
   PostgreSQL and initial admin passwords (created, not migrated)
 - [k3s-apps/paperless](k3s-apps/paperless.md) — Paperless-ngx's own
