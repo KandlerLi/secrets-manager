@@ -6,17 +6,14 @@
 container -- a single `for_each` resource, not a per-secret module. Migrated here from [`terraform-state`](https://github.com/KandlerLi/terraform-state)
 2026-09-11 — container only, no value.
 
-**Consumed by**: [`home-infra`](https://github.com/KandlerLi/home-infra)'s own Ansible
-(`ansible/playbooks/site.yml`'s `pre_tasks`, gated on
-`nextcloud_aio_oidc_enabled`), **not** Terraform — Nextcloud AIO runs
-on the homeserver itself, not in k3s, unlike every other OIDC client.
-
-Since ADR 0033 (Nextcloud moves to k3s) also read by the External
-Secrets Operator in `apps` (role `k3s-eso-apps`) through [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
-`argocd/nextcloud/externalsecret.yaml`: the k3s instance signs in with
-the same `nextcloud` client. Until the cutover a rotation must reach
-both, AIO through Ansible (below) and k3s by force-syncing
-`nextcloud-env`.
+**Consumed by**: the External Secrets Operator in `apps` (role
+`k3s-eso-apps`, ADR 0032) through [`k3s-apps`](https://github.com/KandlerLi/k3s-apps)'
+`argocd/nextcloud/externalsecret.yaml`, which builds `nextcloud-env`.
+Nextcloud runs in k3s since the ADR 0033 cutover; its start hook
+registers the `Authelia` provider with this value
+(`occ user_oidc:provider`). [`home-infra`](https://github.com/KandlerLi/home-infra)'s Ansible still fetches
+it while `nextcloud_aio_oidc_enabled` is set, but skips the OIDC tasks
+for the parked AIO.
 
 ## Keys
 
@@ -28,21 +25,13 @@ the matching hash (`home-infra/authelia`'s
 
 **Rotation**: generate a fresh plaintext + hash together (see
 `home-infra/authelia.md`'s own note for the exact command), then
-`[`k3s-apps/scripts/rotate-oidc-client-secret.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-oidc-client-secret.sh) nextcloud` (script
-support added 2026-09-11 — this used to be a manual procedure). Unlike
-Grafana, the script's own `terraform apply` only rolls
-Authelia's side here — Nextcloud AIO runs on the homeserver, not k3s,
-so there's no Deployment for it there. The script additionally re-runs
-[`home-infra`](https://github.com/KandlerLi/home-infra)'s `site.yml` itself (`--ask-become-pass`, so it
-prompts for your sudo password when you run the script) so the new
-plaintext reaches Nextcloud's own `occ user_oidc:provider` config —
-confirmed live this is a real upsert, not a formality (unlike
-`home-infra/monitoring`'s SES creds, which turned out to be
-assert-only in Ansible and need no re-run at all).
+[`k3s-apps/scripts/rotate-oidc-client-secret.sh`](https://github.com/KandlerLi/k3s-apps/blob/main/scripts/rotate-oidc-client-secret.sh) `nextcloud`. It writes
+both halves and force-syncs Authelia's config and `nextcloud-env`;
+Reloader restarts both, and Nextcloud's start hook re-registers the
+provider with the new plaintext. Verify: sign out, "Sign in with
+Authelia" must land back in Nextcloud authenticated.
 
 ## Automated rotation
 
-Structurally resistant, same as every OIDC pair — and this one spans
-two different repos/tools (Terraform for Authelia, Ansible for
-Nextcloud) for a single logical rotation, making unattended automation
-even less appropriate than the Grafana pair.
+Structurally resistant, same as every OIDC pair: both halves must change
+together and the result can only be checked with a browser login.
