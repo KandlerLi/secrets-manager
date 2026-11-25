@@ -51,7 +51,8 @@ Fine-grained personal access token the GitHub runner exporter reads
 runner status and queued runs with. Create it under *Settings →
 Developer settings → Fine-grained tokens*:
 
-- Resource owner `KandlerLi`, expiration 1 year.
+- Resource owner `KandlerLi`, expiration 1 year (GitHub preselects 30
+  days).
 - *Only select repositories*: exactly the repos with `runner: true` in
   [`repo-infra`](https://github.com/KandlerLi/repo-infra)'s `config.yml`.
 - Repository permissions: **Administration: Read-only** (the runner
