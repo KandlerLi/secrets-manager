@@ -27,7 +27,7 @@ their token file on every request, so nothing needs restarting.
 ### `monitoring_k3s_kubelet_token`
 ServiceAccount token (`prometheus-kubelet`, `get` on `nodes/metrics`
 only) for scraping each kubelet's `/metrics/cadvisor`. Made by
-[`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap)'s `kubelet_metrics_rbac.tf`.
+[`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap)'s `platform/rbac/prometheus-kubelet.yaml`, synced by the platform Argo CD (k3s fills in the token).
 
 Copy it in, with the kubectl tunnel open and `aws login` done. The
 token never reaches the screen or argv:
@@ -41,10 +41,10 @@ aws secretsmanager get-secret-value --region eu-central-1 --secret-id home-infra
 ```
 Check: the `k3s_kubelet_cadvisor` targets in Prometheus are `up`.
 
-**Rotating**: in `k3s-bootstrap`, `scripts/roll-out.sh apply
--replace=kubernetes_secret_v1.prometheus_kubelet_token` (the old token
-dies with the Secret), then the copy above and `site.yml`. The scrape
-fails with 401 in between.
+**Rotating**: `kubectl -n default delete secret prometheus-kubelet-token`
+(the old token dies with the Secret), sync `platform-root` on
+`argo-platform.jkandler.de` (recreates it with a new token), then the copy
+above and `site.yml`. The scrape fails with 401 in between.
 
 ### `monitoring_github_runner_exporter_token`
 Fine-grained personal access token the GitHub runner exporter reads
