@@ -5,7 +5,7 @@
 root `main.tf` ([`secrets-manager`](https://github.com/KandlerLi/secrets-manager)). A new secret, not a
 migration.
 
-**Consumed by**: [`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap)' `argocd.tf`, read via
+**Consumed by**: [`k3s-bootstrap`](https://github.com/KandlerLi/k3s-bootstrap)' `argocd.tf` and `argocd_platform.tf`, read via
 `secrets.tf` by the `k3s-bootstrap-local` identity (read-only grant in
 [`terraform-state`](https://github.com/KandlerLi/terraform-state)'s `k3s_bootstrap_local.tf`). Argo CD's server
 signing key is not here: Argo CD generates it in-cluster.
@@ -13,7 +13,7 @@ signing key is not here: Argo CD generates it in-cluster.
 ## Keys
 
 ### `authelia_oidc_argocd_client_secret`
-The only key in this group. Plaintext half of Argo CD's OIDC client
+Plaintext half of the apps Argo CD's OIDC client
 secret pair -- Authelia holds the matching hash
 (`home-infra/authelia`'s `authelia_oidc_argocd_client_secret_hash`).
 Never rotate this alone.
@@ -26,14 +26,23 @@ k3s-bootstrap (Argo CD's side). Verify for real afterward: sign out of
 `argo.jkandler.de`, "Log in via Authelia" must land back in Argo CD
 authenticated.
 
-## Bootstrapping the first value
+### `authelia_oidc_argocd_platform_client_secret`
+Plaintext half of the platform Argo CD's OIDC client secret pair (ADR
+0037, client `argocd-platform`, UI on `argo-platform.jkandler.de`, LAN
+only). Authelia holds the hash (`home-infra/authelia`'s
+`authelia_oidc_argocd_platform_client_secret_hash`). Rotation: same as
+above with `rotate-oidc-client-secret.sh argocd-platform`.
 
-This container starts empty, and `home-infra/authelia` has no
-`authelia_oidc_argocd_client_secret_hash` key yet, so
-`rotate-oidc-client-secret.sh` (which refuses to add a missing key)
-can't do the first write. Generate the pair, then seed both halves by
-hand. Values are read from silent prompts and passed as `file://` from
-a private temp file, never as a command-line argument:
+## Bootstrapping a new client's first pair
+
+Since 2026-11-28, `rotate-oidc-client-secret.sh <client> --new` writes
+both halves when neither key exists yet (and refuses if one does). It
+skips the k3s-bootstrap apply: k3s-bootstrap starts reading the key in
+its own PR. Then add an `authelia-oidc:<client>` entry to
+`rotation-schedule.json` with the seeding date.
+
+The first pair of `argocd` (2026-11) was seeded by hand like this,
+before `--new` existed:
 
 ```bash
 docker run --rm authelia/authelia:4.39.22 \
