@@ -54,7 +54,7 @@ hand. Values are read from silent prompts and passed as `file://` from
 a private temp file, never as a command-line argument:
 
 ```bash
-docker run --rm authelia/authelia:4.39.22 \
+kubectl -n auth exec deploy/authelia -c authelia -- \
   authelia crypto hash generate pbkdf2 --variant sha512 \
   --random --random.length 64 --random.charset alphanumeric
 

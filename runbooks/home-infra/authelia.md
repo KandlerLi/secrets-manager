@@ -69,10 +69,12 @@ any reset link currently in flight (rare).
 **Personal credential** — Argon2id hash of Julian's own Authelia login
 password (the file `authentication_backend`'s `users_database.yml`).
 Only the hash lives here; the plaintext stays in a password manager,
-never in this secret or in git. Generate with:
+never in this secret or in git. Generate with the running Authelia (the
+version that checks it; no local Docker needed), which prompts for the
+password, so it stays out of the shell history:
 ```bash
-docker run --rm authelia/authelia:4.39.22 \
-  authelia crypto hash generate argon2 --password '<password>'
+kubectl -n auth exec -it deploy/authelia -c authelia -- \
+  authelia crypto hash generate argon2
 ```
 Update the password manager entry *before* rotating this value, not
 after — there's no way to recover the plaintext once only the hash
@@ -102,7 +104,7 @@ Secrets Manager group (`home-infra/grafana`,
 breaks that client's SSO outright.** Generate hash + plaintext
 together, in one command:
 ```bash
-docker run --rm authelia/authelia:4.39.22 \
+kubectl -n auth exec deploy/authelia -c authelia -- \
   authelia crypto hash generate pbkdf2 --variant sha512 \
   --random --random.length 64 --random.charset alphanumeric
 ```
