@@ -45,7 +45,7 @@ The first pair of `argocd` (2026-11) was seeded by hand like this,
 before `--new` existed:
 
 ```bash
-docker run --rm authelia/authelia:4.39.22 \
+kubectl -n auth exec deploy/authelia -c authelia -- \
   authelia crypto hash generate pbkdf2 --variant sha512 \
   --random --random.length 64 --random.charset alphanumeric
 
